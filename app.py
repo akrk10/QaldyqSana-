@@ -9,10 +9,6 @@ page_icon="♻️",
 layout="wide"
 )
 
-st.markdown("""
-
-""", unsafe_allow_html=True)
-
 st.title("♻️ QaldyqSana")
 st.caption("AI-Powered Waste Classification Platform")
 
@@ -23,23 +19,27 @@ page = st.sidebar.radio(
 )
 
 if page == "Dashboard":
-    st.header("Waste Analytics Dashboard")
+st.header("Waste Analytics Dashboard")
 st.info("Upload waste images in AI Scanner to begin.")
 
 elif page == "AI Scanner":
-    st.header("AI Waste Scanner")
+st.header("AI Waste Scanner")
+
 uploaded = st.file_uploader(
-"Upload a waste image",
-type=["jpg", "jpeg", "png"]
+    "Upload a waste image",
+    type=["jpg", "jpeg", "png"]
 )
 
 if uploaded:
     image = Image.open(uploaded)
-    st.image(image, caption="Uploaded image",
-             use_container_width=True)
+    st.image(
+        image,
+        caption="Uploaded image",
+        use_container_width=True
+    )
     st.warning("YOLO11n model integration is coming next.")
 elif page == "About":
-    st.header("About QaldyqSana")
+st.header("About QaldyqSana")
 st.write(
 "An AI-powered platform designed to "
 "classify waste into five recyclable categories."
