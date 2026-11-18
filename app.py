@@ -19,8 +19,8 @@ type=["jpg", "jpeg", "png"]
 )
 
 if uploaded:
-image = Image.open(uploaded).convert("RGB")
-st.image(image, caption="Uploaded image")
+    image = Image.open(uploaded).convert("RGB")
+    st.image(image, caption="Uploaded image")
 
 if st.button("Analyze waste"):
     with st.spinner("AI is analyzing..."):
