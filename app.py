@@ -9,7 +9,7 @@ st.caption("AI-Powered Waste Classification")
 
 @st.cache_resource
 def load_model():
-return YOLO("best.pt")
+    return YOLO("best.pt")
 
 model = load_model()
 
