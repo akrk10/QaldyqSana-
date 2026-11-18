@@ -20,7 +20,7 @@ page = st.sidebar.radio(
 
 if page == "Dashboard":
     st.header("Waste Analytics Dashboard")
-st.info("Upload waste images in AI Scanner to begin.")
+    st.info("Upload waste images in AI Scanner to begin.")
 
 elif page == "AI Scanner":
     st.header("AI Waste Scanner")
