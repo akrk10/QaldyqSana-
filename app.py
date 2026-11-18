@@ -1,49 +1,42 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
 from PIL import Image
+from ultralytics import YOLO
 
-st.set_page_config(
-page_title="QaldyqSana",
-page_icon="♻️",
-layout="wide"
-)
+st.set_page_config(page_title="QaldyqSana", page_icon="♻️")
 
 st.title("♻️ QaldyqSana")
-st.caption("AI-Powered Waste Classification Platform")
+st.caption("AI-Powered Waste Classification")
 
-st.sidebar.title("Navigation")
-page = st.sidebar.radio(
-"Choose section",
-["Dashboard", "AI Scanner", "About"]
-)
+@st.cache_resource
+def load_model():
+return YOLO("best.pt")
 
-if page == "Dashboard":
-    st.header("Waste Analytics Dashboard")
-    st.info("Upload waste images in AI Scanner to begin.")
-
-elif page == "AI Scanner":
-    st.header("AI Waste Scanner")
+model = load_model()
 
 uploaded = st.file_uploader(
-    "Upload a waste image",
-    type=["jpg", "jpeg", "png"]
+"Upload waste image",
+type=["jpg", "jpeg", "png"]
 )
 
 if uploaded:
-    image = Image.open(uploaded)
-    st.image(
-        image,
-        caption="Uploaded image",
-        use_container_width=True
-    )
-    st.warning("YOLO11n model integration is coming next.")
-elif page == "About":
-    st.header("About QaldyqSana")
-st.write(
-"An AI-powered platform designed to "
-"classify waste into five recyclable categories."
-)
-st.write(
-"Plastic | Paper/Cardboard | Metal | Glass | Other"
-)
+image = Image.open(uploaded).convert("RGB")
+st.image(image, caption="Uploaded image")
+
+if st.button("Analyze waste"):
+    with st.spinner("AI is analyzing..."):
+        results = model.predict(image)
+
+    result = results[0]
+
+    if len(result.boxes) > 0:
+        for box in result.boxes:
+            class_id = int(box.cls[0])
+            confidence = float(box.conf[0]) * 100
+            category = model.names[class_id]
+
+            st.success(f"Category: {category}")
+            st.write(f"Confidence: {confidence:.1f}%")
+    else:
+        st.warning("No waste detected.")
+st.divider()
+st.write("Plastic | Paper/Cardboard | Metal | Glass | Other")
