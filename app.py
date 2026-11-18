@@ -27,7 +27,7 @@ if page == "Dashboard":
 st.info("Upload waste images in AI Scanner to begin.")
 
 elif page == "AI Scanner":
-st.header("AI Waste Scanner")
+    st.header("AI Waste Scanner")
 uploaded = st.file_uploader(
 "Upload a waste image",
 type=["jpg", "jpeg", "png"]
@@ -39,7 +39,7 @@ if uploaded:
              use_container_width=True)
     st.warning("YOLO11n model integration is coming next.")
 elif page == "About":
-st.header("About QaldyqSana")
+    st.header("About QaldyqSana")
 st.write(
 "An AI-powered platform designed to "
 "classify waste into five recyclable categories."
