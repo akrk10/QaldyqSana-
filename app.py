@@ -18,12 +18,12 @@ FILE_ID = "13KWKyzBpYzWlrG9vpQvkoPYgk0gMUaWZ"
 
 @st.cache_resource
 def load_model():
-if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
-gdown.download(
-f"https://drive.google.com/uc?id={FILE_ID}",
-MODEL_PATH,
-quiet=False
-)
+    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
+        gdown.download(
+            f"https://drive.google.com/uc?id={FILE_ID}",
+            MODEL_PATH,
+            quiet=False
+        )
 
 return YOLO(MODEL_PATH)
 try:
