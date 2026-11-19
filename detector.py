@@ -1,43 +1,40 @@
 import os
-import io
 import gdown
-
 from PIL import Image, ImageOps
 from ultralytics import YOLO
 
-# Model configuration
 FILE_ID = "15FVrrLwqYpXi6W1UbEdcmESovQf95y9b"
 MODEL_PATH = "best_v3.pt"
 
 CONF_THRESHOLD = 0.2
 IOU_THRESHOLD = 0.45
+
 CATEGORIES = [
   "Plastic",
   "Paper/Cardboard",
   "Metal",
   "Glass",
-  "Other"
+  "Other",
 ]
+
 _model = None
 
 def load_model():
   global _model
-  
-  if _model is None:
-    if (
-        not os.path.exists(MODEL_PATH)
-        or os.path.getsize(MODEL_PATH) < 100000
-    ):
+
+if _model is None:
+    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
         gdown.download(
             f"https://drive.google.com/uc?id={FILE_ID}",
             MODEL_PATH,
-            quiet=False
+            quiet=False,
         )
-      _model = YOLO(MODEL_PATH)
-    
-    return _model
+
+    _model = YOLO(MODEL_PATH)
+  return _model
 def to_category(class_name):
   name = str(class_name).lower().replace("_", " ").replace("-", " ")
+  
   if "plastic" in name:
     return "Plastic"
   if "paper" in name or "cardboard" in name:
@@ -47,40 +44,27 @@ def to_category(class_name):
   if "glass" in name:
     return "Glass"
     
-  return "Other"
-
-def _to_pil(image):
-  if isinstance(image, Image.Image):
-    img = image.copy()
-  elif isinstance(image, (bytes, bytearray)):
-    img = Image.open(io.BytesIO(image))
-  elif hasattr(image, "getvalue"):
-    img = Image.open(io.BytesIO(image.getvalue()))
-  elif hasattr(image, "read"):
-    img = Image.open(io.BytesIO(image.read()))
-  else:
-    img = Image.open(image)
-    
-  return ImageOps.exif_transpose(img).convert("RGB")
-
+    return "Other"
 def detect(image):
-  img = _to_pil(image)
-  model = load_model()
-  
-  result = model.predict(
-    source=img,
+  if not isinstance(image, Image.Image):
+    image = Image.open(image)
+
+image = ImageOps.exif_transpose(image).convert("RGB")
+model = load_model()
+
+result = model.predict(
+    source=image,
     conf=CONF_THRESHOLD,
     iou=IOU_THRESHOLD,
-    verbose=False
+    verbose=False,
 )[0]
 
-names = result.names
 counts = {category: 0 for category in CATEGORIES}
 detections = []
 
 for box in result.boxes:
     class_id = int(box.cls[0])
-    class_name = str(names[class_id])
+    class_name = str(result.names[class_id])
     category = to_category(class_name)
 
     x1, y1, x2, y2 = [
@@ -99,16 +83,16 @@ for box in result.boxes:
             "x1": x1,
             "y1": y1,
             "x2": x2,
-            "y2": y2
-        }
+            "y2": y2,
+        },
     })
-  
- return {
+
+return {
     "image": {
-        "width": img.width,
-        "height": img.height
+        "width": image.width,
+        "height": image.height,
     },
     "detections": detections,
     "counts": counts,
-    "total": len(detections)
+    "total": len(detections),
 }
