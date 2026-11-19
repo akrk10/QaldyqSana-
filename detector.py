@@ -37,7 +37,7 @@ def load_model():
         )
 
     _model = YOLO(MODEL_PATH)
-    
+  
   return _model
 # Map model classes to waste categories
 def to_category(class_name):
@@ -98,7 +98,6 @@ for box in result.boxes:
     ]
 
     confidence = round(float(box.conf[0]), 4)
-
     counts[category] += 1
 
     detections.append({
