@@ -68,8 +68,8 @@ def _to_pil(image):
     img = Image.open(io.BytesIO(image.read()))
   else:
     img = Image.open(image)
-
-return ImageOps.exif_transpose(img).convert("RGB")
+    
+    return ImageOps.exif_transpose(img).convert("RGB")
 # Main detection function
 def detect(image):
   img = _to_pil(image)
