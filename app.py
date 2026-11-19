@@ -15,7 +15,11 @@ MODEL_PATH = "best.pt"
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
-        gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False, fuzzy=True)
+       gdown.download(
+           f"https://drive.google.com/uc?id={FILE_ID}",
+           MODEL_PATH,
+           quiet=False
+)
     return YOLO(MODEL_PATH)
 
 model = load_model()
