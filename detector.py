@@ -21,8 +21,8 @@ _model = None
 
 def load_model():
   global _model
-
-if _model is None:
+  
+   if _model is None:
     if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
         gdown.download(
             f"https://drive.google.com/uc?id={FILE_ID}",
@@ -30,7 +30,8 @@ if _model is None:
             quiet=False,
         )
 
-    _model = YOLO(MODEL_PATH)
+     _model = YOLO(MODEL_PATH)
+    
   return _model
 def to_category(class_name):
   name = str(class_name).lower().replace("_", " ").replace("-", " ")
