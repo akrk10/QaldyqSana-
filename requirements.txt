@@ -5,3 +5,6 @@ pillow
 ultralytics
 opencv-python-headless
 gdown
+fastapi
+uvicorn
+python-multipart
