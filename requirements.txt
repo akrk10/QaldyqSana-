@@ -4,3 +4,4 @@ plotly
 pillow
 ultralytics
 opencv-python-headless
+gdown
