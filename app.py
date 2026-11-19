@@ -27,8 +27,8 @@ def load_model():
 
 return YOLO(MODEL_PATH)
 try:
-model = load_model()
-st.success("AI model loaded successfully!")
+    model = load_model()
+    st.success("AI model loaded successfully!")
 
 uploaded = st.file_uploader(
     "Upload a waste image",
