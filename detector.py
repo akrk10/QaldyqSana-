@@ -11,7 +11,6 @@ MODEL_PATH = "best_v3.pt"
 
 CONF_THRESHOLD = 0.2
 IOU_THRESHOLD = 0.45
-
 CATEGORIES = [
   "Plastic",
   "Paper/Cardboard",
@@ -19,9 +18,8 @@ CATEGORIES = [
   "Glass",
   "Other"
 ]
-
-# Load YOLO11n V3
 _model = None
+
 def load_model():
   global _model
   
@@ -35,28 +33,22 @@ def load_model():
             MODEL_PATH,
             quiet=False
         )
-
-    _model = YOLO(MODEL_PATH)
-  
-  return _model
-# Map model classes to waste categories
+      _model = YOLO(MODEL_PATH)
+    
+    return _model
 def to_category(class_name):
   name = str(class_name).lower().replace("_", " ").replace("-", " ")
-  
   if "plastic" in name:
     return "Plastic"
-    
   if "paper" in name or "cardboard" in name:
     return "Paper/Cardboard"
-    
   if "metal" in name or "aluminium" in name or "aluminum" in name:
     return "Metal"
-    
   if "glass" in name:
     return "Glass"
     
   return "Other"
-# Convert uploaded image to RGB
+
 def _to_pil(image):
   if isinstance(image, Image.Image):
     img = image.copy()
@@ -69,13 +61,13 @@ def _to_pil(image):
   else:
     img = Image.open(image)
     
-    return ImageOps.exif_transpose(img).convert("RGB")
-# Main detection function
+  return ImageOps.exif_transpose(img).convert("RGB")
+
 def detect(image):
   img = _to_pil(image)
   model = load_model()
-
-result = model.predict(
+  
+  result = model.predict(
     source=img,
     conf=CONF_THRESHOLD,
     iou=IOU_THRESHOLD,
@@ -83,7 +75,6 @@ result = model.predict(
 )[0]
 
 names = result.names
-
 counts = {category: 0 for category in CATEGORIES}
 detections = []
 
@@ -111,8 +102,8 @@ for box in result.boxes:
             "y2": y2
         }
     })
-
-return {
+  
+ return {
     "image": {
         "width": img.width,
         "height": img.height
