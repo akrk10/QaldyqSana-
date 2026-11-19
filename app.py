@@ -14,25 +14,25 @@ MODEL_PATH = "best.pt"
 
 @st.cache_resource
 def load_model():
-if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
-gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False, fuzzy=True)
-return YOLO(MODEL_PATH)
+    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
+        gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False, fuzzy=True)
+    return YOLO(MODEL_PATH)
 
 model = load_model()
 st.success("AI model loaded successfully!")
 
 uploaded = st.file_uploader(
-"Upload a waste image",
-type=["jpg", "jpeg", "png"]
+    "Upload a waste image",
+    type=["jpg", "jpeg", "png"]
 )
 
 if uploaded is not None:
-image = Image.open(uploaded).convert("RGB")
-st.image(image, caption="Uploaded image", use_container_width=True)
-
-if st.button("Analyze waste"):
-    results = model.predict(image)
-    result = results[0]
+    image = Image.open(uploaded).convert("RGB")
+    st.image(image, caption="Uploaded image", use_container_width=True)
+    
+    if st.button("Analyze waste"):
+        results = model.predict(image)
+        result = results[0]
 
     if len(result.boxes) > 0:
         for box in result.boxes:
