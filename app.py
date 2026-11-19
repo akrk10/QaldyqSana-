@@ -41,12 +41,45 @@ if st.button("Analyze waste"):
     annotated_image = result.plot()
     st.image(annotated_image, caption="AI Detection Results")
     
-    if len(result.boxes) > 0:
-        for box in result.boxes:
-            class_id = int(box.cls[0])
-            confidence = float(box.conf[0]) * 100
-            st.write(f"Category: {model.names[class_id]}")
-            st.write(f"Confidence: {confidence:.1f}%")
+    categories = {
+    "Plastic": 0,
+    "Paper/Cardboard": 0,
+    "Metal": 0,
+    "Glass": 0,
+    "Other": 0
+}
+    confidences = []
+    
+    for box in result.boxes:
+        class_id = int(box.cls[0])
+        category = model.names[class_id]
+        confidence = float(box.conf[0]) * 100
+        
+        if category in categories:
+            categories[category] += 1
+            confidences.append(confidence)
+    
+    st.subheader("Analysis Summary")
+    
+    total = sum(categories.values())
+    st.metric("Total detected objects", total)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.metric("Plastic", categories["Plastic"])
+        st.metric("Paper/Cardboard", categories["Paper/Cardboard"])
+        st.metric("Metal", categories["Metal"])
+    
+    with col2:
+        st.metric("Glass", categories["Glass"])
+        st.metric("Other", categories["Other"])
+        
+    if confidences:
+        st.metric(
+            "Average confidence",
+            f"{sum(confidences) / len(confidences):.1f}%"
+        )
     else:
         st.warning("No waste detected.")
 st.divider()
