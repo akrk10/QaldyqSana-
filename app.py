@@ -10,7 +10,7 @@ st.title("♻️ QaldyqSana")
 st.caption("AI-Powered Waste Classification Platform")
 
 FILE_ID = "13KWKyzBpYzWlrG9vpQvkoPYgk0gMUaWZ"
-MODEL_PATH = "best.pt"
+MODEL_PATH = "best_v3.pt"
 
 @st.cache_resource
 def load_model():
