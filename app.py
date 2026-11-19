@@ -29,11 +29,11 @@ return YOLO(MODEL_PATH)
 try:
     model = load_model()
     st.success("AI model loaded successfully!")
-
-uploaded = st.file_uploader(
-    "Upload a waste image",
-    type=["jpg", "jpeg", "png"]
-)
+    
+    uploaded = st.file_uploader(
+        "Upload a waste image",
+        type=["jpg", "jpeg", "png"]
+    )
 
 if uploaded:
     image = Image.open(uploaded).convert("RGB")
