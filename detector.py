@@ -37,8 +37,8 @@ def load_model():
         )
 
     _model = YOLO(MODEL_PATH)
-
-return _model
+    
+  return _model
 # Map model classes to waste categories
 def to_category(class_name):
   name = str(class_name).lower().replace("_", " ").replace("-", " ")
