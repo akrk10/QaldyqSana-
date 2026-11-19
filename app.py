@@ -34,15 +34,18 @@ if uploaded is not None:
     image = Image.open(uploaded).convert("RGB")
     st.image(image, caption="Uploaded image", use_container_width=True)
     
-    if st.button("Analyze waste"):
-        results = model.predict(image, conf=0.15, iou=0.45)
-        result = results[0]
-
+if st.button("Analyze waste"):
+    results = model.predict(image, conf=0.25, iou=0.45)
+    result = results[0]
+    
+    annotated_image = result.plot()
+    st.image(annotated_image, caption="AI Detection Results")
+    
     if len(result.boxes) > 0:
         for box in result.boxes:
             class_id = int(box.cls[0])
             confidence = float(box.conf[0]) * 100
-            st.success(f"Category: {model.names[class_id]}")
+            st.write(f"Category: {model.names[class_id]}")
             st.write(f"Confidence: {confidence:.1f}%")
     else:
         st.warning("No waste detected.")
