@@ -35,7 +35,7 @@ if uploaded is not None:
     st.image(image, caption="Uploaded image", use_container_width=True)
     
     if st.button("Analyze waste"):
-        results = model.predict(image, conf=0.5, iou=0.45)
+        results = model.predict(image, conf=0.15, iou=0.45)
         result = results[0]
 
     if len(result.boxes) > 0:
