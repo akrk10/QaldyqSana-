@@ -7,17 +7,17 @@ import gdown
 import pandas as pd
 from PIL import Image
 from ultralytics import YOLO
-==========================================
+# ==========================================
 # PAGE CONFIGURATION
-==========================================
+# ==========================================
 st.set_page_config(
     page_title="QaldyqSana",
     page_icon="♻️",
     layout="wide"
 )
-==========================================
+# ==========================================
 # CONSTANTS
-==========================================
+# ==========================================
 FILE_ID = "13KWKyzBpYzWlrG9vpQvkoPYgk0gMUaWZ"
 MODEL_PATH = "best_v3.pt"
 CATEGORIES = [
@@ -36,16 +36,16 @@ ALIASES = {
     "glass": "Glass",
     "other": "Other"
 }
-==========================================
+# ==========================================
 # SESSION STATE
-==========================================
+# ==========================================
 if "history" not in st.session_state:
     st.session_state.history = []
 if "last_analysis" not in st.session_state:
     st.session_state.last_analysis = None
-==========================================
+# ==========================================
 # LOAD YOLO MODEL
-==========================================
+# ==========================================
 @st.cache_resource
 def load_model():
     
@@ -75,9 +75,9 @@ def load_model():
         )
         
     return loaded_model
-==========================================
+# ==========================================
 # SIDEBAR NAVIGATION
-==========================================
+# ==========================================
 st.sidebar.title("♻️ QaldyqSana")
 st.sidebar.caption(
     "AI-powered waste analysis system"
@@ -97,9 +97,9 @@ st.sidebar.info(
     "Smart waste recognition powered by "
     "Artificial Intelligence."
 )
-==========================================
+# ==========================================
 # HOME
-==========================================
+# ==========================================
 if page == "Home":
     st.title("♻️ QaldyqSana")
     
@@ -142,9 +142,9 @@ if page == "Home":
         "Navigate to **AI Analysis** to upload "
         "an image and start detecting waste."
     )
-==========================================
+# ==========================================
 # AI ANALYSIS
-==========================================
+# ==========================================
 elif page == "AI Analysis": 
     
     st.title("🔍 AI Waste Analysis")
@@ -342,9 +342,9 @@ elif page == "AI Analysis":
                 st.error(
                     f"Analysis error: {error}"
                 )
-==========================================
+# ==========================================
 # DASHBOARD
-==========================================
+# ==========================================
 elif page == "Dashboard":
     
     st.title("📊 Dashboard")
@@ -435,9 +435,9 @@ elif page == "Dashboard":
             use_container_width=True,
             hide_index=True
         )
-==========================================
+# ==========================================
 # HISTORY
-==========================================
+# ==========================================
 elif page == "History":
     st.title("🕘 Analysis History")
 
@@ -476,9 +476,9 @@ elif page == "History":
             st.session_state.last_analysis = None
             
             st.rerun()
-==========================================
+# ==========================================
 # ABOUT
-==========================================
+# ==========================================
 elif page == "About":
     st.title("ℹ️ About QaldyqSana")
 
