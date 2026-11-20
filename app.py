@@ -273,8 +273,7 @@ elif page == "AI Analysis":
                         recyclable_percent, 1
                     )
                 })
-
-                st.success("Analysis completed!")
+                    st.success("Analysis completed!")
 
                 st.subheader("Detection Results")
 
