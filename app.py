@@ -116,6 +116,7 @@ if page == "Home":
         st.rerun()
 # ---------- AI ANALYSIS ----------
 elif page == "AI Analysis":
+    
     st.title("🔍 AI Waste Analysis")
     
     st.write(
