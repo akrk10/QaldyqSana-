@@ -13,35 +13,37 @@ logger = logging.getLogger("qaldyqsana")
 app = FastAPI(title="QaldyqSana API")
 
 app.add_middleware(
-  CORSMiddleware,
-  allow_origins=[""],
-  allow_methods=[""],
-  allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
 
 @app.get("/")
 def home():
-  return {"message": "QaldyqSana API is running"}
+    return {"message": "QaldyqSana API is running"}
+
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-  logger.info("1. Image upload started")
-  
-  try:
-    contents = await file.read()
-    logger.info("2. Image received: %s bytes", len(contents))
+    logger.info("1. Image upload started")
 
-    image = Image.open(io.BytesIO(contents)).convert("RGB")
-    logger.info("3. Image opened: %s", image.size)
+    try:
+        contents = await file.read()
+        logger.info("2. Image received: %s bytes", len(contents))
 
-    result = detect(image)
-    logger.info("4. Detection completed")
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        logger.info("3. Image opened: %s", image.size)
 
-    return result
+        result = detect(image)
+        logger.info("4. Detection completed")
 
-except UnidentifiedImageError:
-    raise HTTPException(status_code=400, detail="Invalid image file")
+        return result
 
-except Exception:
-    logger.exception("Prediction failed")
-    raise HTTPException(status_code=500, detail="Image processing failed")
+    except UnidentifiedImageError:
+        raise HTTPException(status_code=400, detail="Invalid image file")
+
+    except Exception:
+        logger.exception("Prediction failed")
+        raise HTTPException(status_code=500, detail="Image processing failed")
