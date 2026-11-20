@@ -8,6 +8,8 @@ MODEL_PATH = "best_v3.pt"
 
 CONF_THRESHOLD = 0.2
 IOU_THRESHOLD = 0.45
+IMAGE_SIZE = 320
+MAX_IMAGE_SIDE = 640
 
 CATEGORIES = [
     "Plastic",
@@ -32,6 +34,7 @@ def load_model():
             )
 
         _model = YOLO(MODEL_PATH)
+        _model.to("cpu")
 
     return _model
 
@@ -56,12 +59,17 @@ def detect(image):
         image = Image.open(image)
 
     image = ImageOps.exif_transpose(image).convert("RGB")
+    image.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
+
     model = load_model()
 
     result = model.predict(
         source=image,
         conf=CONF_THRESHOLD,
         iou=IOU_THRESHOLD,
+        imgsz=IMAGE_SIZE,
+        device="cpu",
+        half=False,
         verbose=False,
     )[0]
 
