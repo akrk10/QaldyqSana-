@@ -156,7 +156,7 @@ elif page == "AI Analysis":
                     image,
                     conf=0.10, 
                     iou=0.45,
-                    imgsz=640
+                    imgsz=640, 
                     verbose=False
                 )
                 
