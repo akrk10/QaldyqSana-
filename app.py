@@ -175,9 +175,15 @@ elif page == "AI Analysis":
                 }
                 
                 for box in result.boxes:
-                    
                     class_id = int(box.cls[0])
                     raw_name = str(model.names[class_id])
+
+                    st.write({
+                        "class_id": class_id,
+                        "raw_name": raw_name,
+                        "confidence": float(box.conf[0])
+                    })
+                   
                     category = aliases.get(
                         raw_name.lower(),
                         "Other"
