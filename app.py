@@ -229,15 +229,36 @@ elif page == "AI Analysis":
                     average = 0
                     st.info("No waste objects detected.")
                     
-                st.subheader("Category Distribution")
-                st.bar_chart(counts)
-
-                st.session_state.history.append({
-                    "Date": datetime.now().strftime("%d.%m.%Y %H:%M"),
-                    "Total": total,
-                    **counts,
-                    "Confidence": f"{average:.1f}%"
-                })
+                st.subheader("♻️ Waste Analysis")
+                
+                total_detected = sum(counts.values())
+                
+                if total_detected > 0:
+                    recyclable = (
+                        counts["Plastic"]
+                        + counts["Paper/Cardboard"]
+                        + counts["Metal"]
+                        + counts["Glass"]
+                    )
+                    
+                    recyclable_percent = (
+                        recyclable / total_detected * 100
+                    )
+                    col1, col2 = st.columns(2)
+                    
+                    col1.metric(
+                        "Recyclable objects",
+                        recyclable
+                    )
+                    col2.metric(
+                        "Recyclable share",
+                        f"{recyclable_percent:.1f}%"
+                    )
+                    st.subheader("Category Distribution")
+                    st.bar_chart(counts)
+                else:
+                    st.info("No objects detected.")
+        
 # ---------- DASHBOARD ----------
 elif page == "Dashboard":
     st.title("📊 Dashboard")
