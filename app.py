@@ -50,20 +50,30 @@ div[data-testid="stMetric"] {
 # ---------- MODEL ----------
 @st.cache_resource
 def load_model():
-    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 100000:
-        gdown.download(
+    if not os.path.exists(MODEL_PATH):
+        downloaded = gdown.download(
             f"https://drive.google.com/uc?id={FILE_ID}",
             MODEL_PATH,
             quiet=False
         )
-    if not os.path.exists(MODEL_PATH):
-        raise RuntimeError("Model file was not downloaded.")
         
-        return YOLO(MODEL_PATH)
+        if not downloaded or not os.path.exists(MODEL_PATH):
+            raise RuntimeError("Failed to download YOLO model.")
+            
+    if os.path.getsize(MODEL_PATH) < 100000:
+        raise RuntimeError("The model file is missing or incomplete.")
+        
+    loaded_model = YOLO(MODEL_PATH)
+    
+    if loaded_model is None:
+        raise RuntimeError("YOLO model initialization failed.")
+    
+    return loaded_model
+
 try:
     model = load_model()
 except Exception as error:
-    st.error(f"Could not load AI model: {error}")
+    st.error(f"Model loading error: {error}")
     st.stop()
 # ---------- SESSION DATA ----------
 if "history" not in st.session_state:
