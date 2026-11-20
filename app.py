@@ -1,16 +1,23 @@
 import os
 from datetime import datetime
+from io import BytesIO
 
 import streamlit as st
 import gdown
+import pandas as pd
 from PIL import Image
-
 from ultralytics import YOLO
+==========================================
+PAGE CONFIGURATION
+==========================================
 st.set_page_config(
     page_title="QaldyqSana",
     page_icon="♻️",
     layout="wide"
 )
+==========================================
+CONSTANTS
+==========================================
 FILE_ID = "13KWKyzBpYzWlrG9vpQvkoPYgk0gMUaWZ"
 MODEL_PATH = "best_v3.pt"
 CATEGORIES = [
@@ -20,68 +27,61 @@ CATEGORIES = [
     "Glass",
     "Other"
 ]
-# ---------- DESIGN ----------
-
-st.markdown("""
-<style>
-.stApp {
-    background: #f5f8f5;
+ALIASES = {
+    "plastic": "Plastic",
+    "paper": "Paper/Cardboard",
+    "paper/cardboard": "Paper/Cardboard",
+    "cardboard": "Paper/Cardboard",
+    "metal": "Metal",
+    "glass": "Glass",
+    "other": "Other"
 }
-section[data-testid="stSidebar"] {
-    background: #e8f1e9;
-}
-.main-title {
-    font-size: 42px;
-    font-weight: 800;
-    color: #176b45;
-}
-.subtitle {
-    color: #63776a;
-    font-size: 16px;
-}
-div[data-testid="stMetric"] {
-    background: white;
-    padding: 18px;
-    border-radius: 14px;
-    border: 1px solid #e2ebe3;
-}
-</style>
-""", unsafe_allow_html=True)
-# ---------- MODEL ----------
+==========================================
+SESSION STATE
+==========================================
+if "history" not in st.session_state:
+    st.session_state.history = []
+if "last_analysis" not in st.session_state:
+    st.session_state.last_analysis = None
+==========================================
+LOAD YOLO MODEL
+==========================================
 @st.cache_resource
 def load_model():
+    
     if not os.path.exists(MODEL_PATH):
+        
         downloaded = gdown.download(
-            f"https://drive.google.com/uc?id={FILE_ID}",
-            MODEL_PATH,
-            quiet=False
+            url=f"https://drive.google.com/uc?id={FILE_ID}",
+            output=MODEL_PATH,
+            quiet=False,
+            fuzzy=True
         )
         
         if not downloaded or not os.path.exists(MODEL_PATH):
-            raise RuntimeError("Failed to download YOLO model.")
-            
+            raise RuntimeError(
+                "Could not download the YOLO model."
+            )
     if os.path.getsize(MODEL_PATH) < 100000:
-        raise RuntimeError("The model file is missing or incomplete.")
+        raise RuntimeError(
+            "The model file is missing or incomplete."
+        )
         
     loaded_model = YOLO(MODEL_PATH)
     
     if loaded_model is None:
-        raise RuntimeError("YOLO model initialization failed.")
-    
+        raise RuntimeError(
+            "YOLO model initialization failed."
+        )
+        
     return loaded_model
-
-try:
-    model = load_model()
-    st.write("YOLO class name:", model.names)
-except Exception as error:
-    st.error(f"Model loading error: {error}")
-    st.stop()
-# ---------- SESSION DATA ----------
-if "history" not in st.session_state:
-    st.session_state.history = []
-# ---------- SIDEBAR ----------
-st.sidebar.markdown("# ♻️ QaldyqSana")
-st.sidebar.caption("AI Waste Classification")
+==========================================
+SIDEBAR NAVIGATION
+==========================================
+st.sidebar.title("♻️ QaldyqSana")
+st.sidebar.caption(
+    "AI-powered waste analysis system"
+)
 page = st.sidebar.radio(
     "Navigation",
     [
@@ -92,237 +92,431 @@ page = st.sidebar.radio(
         "About"
     ]
 )
-# ---------- HOME ----------
+st.sidebar.divider()
+st.sidebar.info(
+    "Smart waste recognition powered by "
+    "Artificial Intelligence."
+)
+==========================================
+HOME
+==========================================
 if page == "Home":
-    st.markdown(
-        '<div class="main-title">QaldyqSana ♻️</div>',
-        unsafe_allow_html=True
-    )
+    st.title("♻️ QaldyqSana")
     
-    st.markdown(
-        '<div class="subtitle">Smart waste classification powered by Artificial Intelligence</div>',
-        unsafe_allow_html=True
+    st.subheader(
+        "Intelligent Waste Analysis System"
     )
-    st.divider()
-    
-    st.subheader("Making waste sorting smarter")
     
     st.write(
-        "QaldyqSana is an intelligent waste analysis system "
-        "that uses computer vision to identify different types "
-        "of waste and support more efficient recycling."
+        """
+        QaldyqSana is an AI-powered system designed
+        to recognize and classify waste using
+        computer vision technology.
+        
+        Upload an image, detect different types
+        of waste and explore the analysis results.
+        """
     )
+    
+    st.divider()
+    
     col1, col2, col3 = st.columns(3)
     
-    col1.metric("AI technology", "YOLO11n")
-    col2.metric("Waste categories", "5")
+    col1.metric("AI Technology", "YOLO")
+    col2.metric("Waste Categories", "5")
     col3.metric("Analysis", "Automated")
     
+    st.subheader("Supported Categories")
+    
+    category_columns = st.columns(5)
+    
+    for column, category in zip(
+        category_columns,
+        CATEGORIES
+    ):
+        column.markdown(f"### {category}")
+        
     st.divider()
     
-    st.subheader("Start analyzing")
-    
-    if st.button("Open AI Analysis", use_container_width=True):
-        st.session_state.page = "AI Analysis"
-        st.rerun()
-# ---------- AI ANALYSIS ----------
-elif page == "AI Analysis":
+    st.write(
+        "Navigate to **AI Analysis** to upload "
+        "an image and start detecting waste."
+    )
+==========================================
+AI ANALYSIS
+==========================================
+elif page == "AI Analysis": 
     
     st.title("🔍 AI Waste Analysis")
-    
+
     st.write(
-        "Upload an image and let the AI model identify "
-        "the waste objects."
+        "Upload an image to identify and classify "
+        "different types of waste." 
     )
-    
-    uploaded = st.file_uploader(
-        "Choose an image",
+
+    uploaded_file = st.file_uploader(
+        "Upload an image",
         type=["jpg", "jpeg", "png"]
     )
-    
-    if uploaded is not None:
+
+    if uploaded_file is not None:
         
-        image = Image.open(uploaded).convert("RGB")
+        image = Image.open(
+            BytesIO(uploaded_file.getvalue())
+        ).convert("RGB")
+        
+        st.subheader("Uploaded Image")
         
         st.image(
             image,
-            caption="Uploaded image",
             use_container_width=True
         )
-        if st.button("Analyze Image", type="primary"):
-            with st.spinner("AI is analyzing your image..."):
-                
-                results = model.predict(
-                    image,
-                    conf=0.10, 
-                    iou=0.45,
-                    imgsz=640, 
-                    verbose=False
-                )
-                
-                result = results[0]
-                
-                counts = {category: 0 for category in CATEGORIES}
-                confidences = []
-                
-                aliases = {
-                    "plastic": "Plastic",
-                    "paper": "Paper/Cardboard",
-                    "paper/cardboard": "Paper/Cardboard",
-                    "cardboard": "Paper/Cardboard",
-                    "metal": "Metal",
-                    "glass": "Glass", 
-                    "other": "Other"
-                }
-                
-                for box in result.boxes:
-                    class_id = int(box.cls[0])
-                    raw_name = str(model.names[class_id])
-
-                    st.write({
-                        "class_id": class_id,
-                        "raw_name": raw_name,
-                        "confidence": float(box.conf[0])
-                    })
-                   
-                    category = aliases.get(
-                        raw_name.lower(),
-                        "Other"
+        
+        if st.button(
+            "Analyze Image",
+            type="primary"
+        ):
+            
+            with st.spinner(
+                "Loading AI model and analyzing image..."
+            ):
+                try:
+                    model = load_model()
+                    
+                    results = model.predict(
+                        source=image,
+                        conf=0.2,
+                        iou=0.45,
+                        verbose=False
                     )
-                    confidence = float(box.conf[0]) * 100
                     
-                    counts[category] += 1
-                    confidences.append(confidence)
-                
-                total = sum(counts.values())
-                
-                annotated = result.plot()
+                    result = results[0]
+                    
+                    counts = {
+                        category: 0
+                        for category in CATEGORIES
+                    }
+                    confidences = []
+                    
+                    if result.boxes is not None:
+                        
+                        for box in result.boxes:
+                            
+                            class_id = int(
+                                box.cls[0].item()
+                            )
+                            
+                            if isinstance(model.names, dict):
+                                raw_name = str(
+                                    model.names.get(
+                                        class_id,
+                                        "Other"
+                                    )
+                                ) 
+                            else:
+                                raw_name = str(
+                                    model.names[class_id]
+                                )
+                                
+                            category = ALIASES.get(
+                                raw_name.lower(),
+                                "Other"
+                            )
 
-                st.success("Analysis completed!")
-                
-                st.subheader("Detection Results")
-                
-                st.image(
-                    annotated,
-                    caption="AI detection",
-                    channels="BGR",
-                    use_container_width=True
-                )
-                
-                st.subheader("Analysis Summary")
-                
-                st.metric("Total detected objects", total)
-                
-                cols = st.columns(5)
-                
-                for col, category in zip(cols, CATEGORIES):
-                    col.metric(category, counts[category])
-                    
-                if confidences:
-                    average = sum(confidences) / len(confidences)
-                    st.metric(
-                        "Average confidence",
-                        f"{average:.1f}%"
-                    )
-                
-                else:
-                    average = 0
-                    st.info("No waste objects detected.")
-                    
-                st.subheader("♻️ Waste Analysis")
-                
-                total_detected = sum(counts.values())
-                
-                if total_detected > 0:
+                            confidence = float(
+                                box.conf[0].item()
+                            ) * 100
+
+                            counts[category] += 1
+                            confidences.append(confidence)
+
+                    total = sum(counts.values())
+
                     recyclable = (
                         counts["Plastic"]
                         + counts["Paper/Cardboard"]
                         + counts["Metal"]
                         + counts["Glass"]
                     )
-                    
+
                     recyclable_percent = (
-                        recyclable / total_detected * 100
+                        recyclable / total * 100
+                        if total > 0
+                        else 0
                     )
-                    col1, col2 = st.columns(2)
-                    
-                    col1.metric(
-                        "Recyclable objects",
-                        recyclable
+
+                    average_confidence = (
+                        sum(confidences) / len(confidences)
+                        if confidences
+                        else 0
                     )
-                    col2.metric(
-                        "Recyclable share",
-                        f"{recyclable_percent:.1f}%"
+
+                    annotated_image = result.plot()
+
+                    st.session_state.last_analysis = {
+                        "filename": uploaded_file.name,
+                        "total": total,
+                        "recyclable": recyclable,
+                        "recyclable_percent": recyclable_percent,
+                        "average_confidence": average_confidence,
+                        "counts": counts.copy()
+                    }
+
+                    st.session_state.history.append({
+                        "Date": datetime.now().strftime(
+                            "%Y-%m-%d %H:%M"
+                    ),
+                    "Filename": uploaded_file.name,
+                    "Total objects": total,
+                    "Recyclable detections": recyclable,
+                    "Recyclable share (%)": round(
+                        recyclable_percent, 1
                     )
-                    st.subheader("Category Distribution")
-                    st.bar_chart(counts)
+                })
+
+                st.success("Analysis completed!")
+
+                st.subheader("Detection Results")
+
+                st.image(
+                    annotated_image,
+                    channels="BGR",
+                    use_container_width=True
+                )
+
+                st.subheader("Waste Statistics")
+
+                col1, col2, col3 = st.columns(3)
+
+                col1.metric(
+                    "Total Detected Objects",
+                    total
+                )
+
+                col2.metric(
+                    "Recyclable Category Detections",
+                    recyclable
+                )
+
+                col3.metric(
+                    "Recyclable Category Share",
+                    f"{recyclable_percent:.1f}%"
+                )
+
+                st.subheader("Category Distribution")
+
+                st.bar_chart(counts)
+
+                st.subheader("Detection Details")
+
+                details = pd.DataFrame({
+                    "Category": CATEGORIES,
+                    "Detected Objects": [
+                        counts[category]
+                        for category in CATEGORIES
+                    ]
+                })
+
+                st.dataframe(
+                    details,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                if confidences:
+
+                    st.metric(
+                        "Average Detection Confidence",
+                        f"{average_confidence:.1f}%"
+                    )
+
                 else:
-                    st.info("No objects detected.")
-        
-# ---------- DASHBOARD ----------
+
+                    st.info(
+                        "No waste objects were detected. "
+                        "Try another image."
+                    )
+
+            except Exception as error:
+
+                st.error(
+                    f"Analysis error: {error}"
+                )
+==========================================
+DASHBOARD
+==========================================
 elif page == "Dashboard":
+    
     st.title("📊 Dashboard")
-    
+
+    st.write( 
+        "Overview of the waste analysis results."
+    )
+
     history = st.session_state.history
-    
+
     if not history:
-        st.info("No analysis data yet. Analyze an image first.")
+
+        st.info(
+            "No analysis data available yet. "
+            "Go to AI Analysis and upload an image first."
+        )
+    
     else:
-        total_analyses = len(history)
-        total_objects = sum(item["Total"] for item in history)
         
-        col1, col2 = st.columns(2)
-
-        col1.metric("Total analyses", total_analyses)
-        col2.metric("Objects detected", total_objects)
-
-        totals = {
-            category: sum(item[category] for item in history)
-            for category in CATEGORIES
-        }
-
-        st.subheader("Detected waste by category")
-        st.bar_chart(totals)
-# ---------- HISTORY ----------
+        df = pd.DataFrame(history)
+        
+        total_analyses = len(df)
+        
+        total_objects = int(
+            df["Total objects"].sum()
+        )
+        
+        total_recyclable = int(
+            df["Recyclable detections"].sum()
+        )
+        
+        recyclable_share = (
+            total_recyclable / total_objects * 100
+            if total_objects > 0
+            else 0
+        )
+        
+        col1, col2, col3 = st.columns(3)
+        
+        col1.metric(
+            "Total Analyses",
+            total_analyses
+        )
+        
+        col2.metric(
+            "Detected Objects",
+            total_objects
+        )
+        
+        col3.metric(
+            "Recyclable Category Share",
+            f"{recyclable_share:.1f}%" 
+        )
+        
+        st.divider()
+        
+        st.subheader("Latest Analysis")
+        
+        latest = st.session_state.last_analysis
+        
+        if latest is not None:
+            
+            st.write(
+                f"**File:** {latest['filename']}"
+            )
+            
+            st.write(
+                f"**Detected objects:** {latest['total']}"
+            )
+            
+            st.write(
+                f"**Average confidence:** "
+                f"{latest['average_confidence']:.1f}%"
+            )
+            
+            st.subheader(
+                "Latest Category Distribution"
+            )
+            
+            st.bar_chart(latest["counts"])
+        
+        st.divider()
+        
+        st.subheader("Analysis History Overview")
+        
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True
+        )
+==========================================
+HISTORY
+==========================================
 elif page == "History":
     st.title("🕘 Analysis History")
-    
-    history = st.session_state.history
-    
-    if not history:
-        st.info("Your analysis history is empty.")
-    else:
-        st.dataframe(
-            history,
-            use_container_width=True
-        )
 
-        if st.button("Clear History"):
-            st.session_state.history = []
-            st.rerun()
-# ---------- ABOUT ----------
-elif page == "About":
-    st.title("🌱 About QaldyqSana")
-    
-    st.write(
-        "QaldyqSana is a project focused on applying "
-        "artificial intelligence to automated waste classification."
-    )
-    
-    st.subheader("Technologies")
-    
-    st.markdown("""
-    - **YOLO11n** — object detection
-    - Computer Vision — image analysis
-    - Python — application logic
-    - Streamlit — interactive interface
-    """)
-    
-    st.subheader("Waste categories")
-    
-    for category in CATEGORIES:
-        st.write(f"♻️ {category}")
+    history = st.session_state.history
+
+    if not history:
         
-    st.divider()
+        st.info(
+            "Your analysis history is currently empty."
+        )
+    else:
+        df = pd.DataFrame(history)
+        
+        st.write(
+            f"Total analyses: **{len(df)}**"
+        )
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True
+        )
+        csv = df.to_csv(
+            index=False
+        ).encode("utf-8")
+        
+        st.download_button(
+            label="Download History as CSV",
+            data=csv,
+            file_name="qaldysana_history.csv",
+            mime="text/csv"
+        )
+        
+        if st.button("Clear History"):
+            
+            st.session_state.history = []
+            st.session_state.last_analysis = None
+            
+            st.rerun()
+==========================================
+ABOUT
+==========================================
+elif page == "About":
+    st.title("ℹ️ About QaldyqSana")
+
+    st.subheader(
+        "Artificial Intelligence-Based Waste Analysis"
+    )
+    st.write(
+        """
+        QaldyqSana is a project focused on improving
+        waste identification through artificial
+        intelligence and computer vision.
+
+        The system uses a YOLO object detection model
+        to recognize five waste categories.
+        """
+    )
+
+    st.subheader("Technologies Used")
+
+    technologies = [
+        "Python",
+        "Streamlit",
+        "YOLO",
+        "Ultralytics",
+        "Computer Vision",
+        "Pandas"
+    ]
     
-    st.caption("QaldyqSana — Smarter sorting for a cleaner future.")
+    for technology in technologies:
+        st.write(f"• {technology}")
+        
+    st.subheader("Waste Categories")
+
+    for category in CATEGORIES:
+        st.write(f"• {category}")
+
+    st.divider()
+
+    st.caption(
+        "QaldyqSana — Smart Waste Analysis System"
+    )
