@@ -275,72 +275,70 @@ elif page == "AI Analysis":
                 })
                     st.success("Analysis completed!")
 
-                st.subheader("Detection Results")
+                    st.subheader("Detection Results")
 
-                st.image(
-                    annotated_image,
-                    channels="BGR",
-                    use_container_width=True
-                )
-
-                st.subheader("Waste Statistics")
-
-                col1, col2, col3 = st.columns(3)
-
-                col1.metric(
-                    "Total Detected Objects",
-                    total
-                )
-
-                col2.metric(
-                    "Recyclable Category Detections",
-                    recyclable
-                )
-
-                col3.metric(
-                    "Recyclable Category Share",
-                    f"{recyclable_percent:.1f}%"
-                )
-
-                st.subheader("Category Distribution")
-
-                st.bar_chart(counts)
-
-                st.subheader("Detection Details")
-
-                details = pd.DataFrame({
-                    "Category": CATEGORIES,
-                    "Detected Objects": [
-                        counts[category]
-                        for category in CATEGORIES
-                    ]
-                })
-
-                st.dataframe(
-                    details,
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-                if confidences:
-
-                    st.metric(
-                        "Average Detection Confidence",
-                        f"{average_confidence:.1f}%"
+                    st.image(
+                        annotated_image,
+                        channels="BGR",
+                        use_container_width=True
                     )
 
-                else:
+                    st.subheader("Waste Statistics")
 
-                    st.info(
-                        "No waste objects were detected. "
-                        "Try another image."
+                    col1, col2, col3 = st.columns(3)
+
+                    col1.metric(
+                        "Total Detected Objects",
+                        total
                     )
 
-            except Exception as error:
+                    col2.metric(
+                        "Recyclable Category Detections",
+                        recyclable
+                    )
 
-                st.error(
-                    f"Analysis error: {error}"
-                )
+                    col3.metric(
+                        "Recyclable Category Share",
+                        f"{recyclable_percent:.1f}%"
+                    )
+
+                    st.subheader("Category Distribution")
+
+                    st.bar_chart(counts)
+
+                    st.subheader("Detection Details")
+
+                    details = pd.DataFrame({
+                        "Category": CATEGORIES,
+                        "Detected Objects": [
+                            counts[category]
+                            for category in CATEGORIES
+                        ]
+                    })
+
+                    st.dataframe(
+                        details,
+                        use_container_width=True,
+                        hide_index=True
+                    )
+
+                    if confidences:
+                        
+                        st.metric(
+                            "Average Detection Confidence",
+                            f"{average_confidence:.1f}%"
+                        )
+
+                    else:
+                        
+                        st.info(
+                            "No waste objects were detected. "
+                            "Try another image."
+                        )
+                except Exception as error: 
+                    st.error(
+                        f"Analysis error: {error}"
+                    )
 # ==========================================
 # DASHBOARD
 # ==========================================
