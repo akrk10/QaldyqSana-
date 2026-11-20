@@ -1,10 +1,16 @@
-from fastapi import FastAPI, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
-from detector import detect
 import io
+import logging
 
-app = FastAPI()
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from PIL import Image, UnidentifiedImageError
+
+from detector import detect
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("qaldyqsana")
+
+app = FastAPI(title="QaldyqSana API")
 
 app.add_middleware(
   CORSMiddleware,
@@ -19,5 +25,23 @@ def home():
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-  image = Image.open(io.BytesIO(await file.read()))
-  return detect(image)
+  logger.info("1. Image upload started")
+  
+  try:
+    contents = await file.read()
+    logger.info("2. Image received: %s bytes", len(contents))
+
+    image = Image.open(io.BytesIO(contents)).convert("RGB")
+    logger.info("3. Image opened: %s", image.size)
+
+    result = detect(image)
+    logger.info("4. Detection completed")
+
+    return result
+
+except UnidentifiedImageError:
+    raise HTTPException(status_code=400, detail="Invalid image file")
+
+except Exception:
+    logger.exception("Prediction failed")
+    raise HTTPException(status_code=500, detail="Image processing failed")
