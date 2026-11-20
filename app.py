@@ -154,8 +154,9 @@ elif page == "AI Analysis":
                 
                 results = model.predict(
                     image,
-                    conf=0.2,
+                    conf=0.10, 
                     iou=0.45,
+                    imgsz=640
                     verbose=False
                 )
                 
