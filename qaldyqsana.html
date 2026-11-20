@@ -1,0 +1,889 @@
+<title>QaldyqSana</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)', surface: 'var(--surface)', surface2: 'var(--surface-2)',
+          ink: 'var(--ink)', muted: 'var(--muted)', line: 'var(--line)',
+          brand: 'var(--brand)', accent: 'var(--accent)', accentsoft: 'var(--accent-soft)',
+          onaccent: 'var(--on-accent)', danger: 'var(--danger)', dangersoft: 'var(--danger-soft)',
+          warn: 'var(--warn)', warnsoft: 'var(--warn-soft)'
+        },
+        fontFamily: {
+          display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+          sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+<style>
+  /* Layout concept: sticky app header, dark-green hero panel on Home, calm white cards on a light-grey ground.
+     Colour: forest brand, emerald accent, grey-green neutrals, five fixed category colours shared by every chart and box. */
+  :root {
+    --bg: #F2F5F3; --surface: #FFFFFF; --surface-2: #E8EFEB; --ink: #0E261D; --muted: #52665D; --line: #D9E3DD;
+    --brand: #0B3D2E; --accent: #047857; --accent-bright: #10B981; --accent-soft: #D7F0E3; --on-accent: #FFFFFF;
+    --danger: #B42318; --danger-soft: #FDECEA; --warn: #8A5A00; --warn-soft: #FFF3D6;
+    --c-plastic: #2F6FDE; --c-paper: #D98A0B; --c-metal: #66778A; --c-glass: #0E9AB3; --c-other: #8350D8;
+    --shadow: 0 1px 2px rgba(11,61,46,.05), 0 6px 20px rgba(11,61,46,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #09140F; --surface: #112219; --surface-2: #183026; --ink: #E6F1EB; --muted: #9CB4A8; --line: #24402F;
+      --brand: #0F4A38; --accent: #34D399; --accent-bright: #34D399; --accent-soft: #123A2B; --on-accent: #052E22;
+      --danger: #F59B93; --danger-soft: #3A1A18; --warn: #F2C46B; --warn-soft: #3A2D10;
+      --c-plastic: #6A9BFF; --c-paper: #F2B33D; --c-metal: #94A3B8; --c-glass: #3CC3DB; --c-other: #A98BF5;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #09140F; --surface: #112219; --surface-2: #183026; --ink: #E6F1EB; --muted: #9CB4A8; --line: #24402F;
+    --brand: #0F4A38; --accent: #34D399; --accent-bright: #34D399; --accent-soft: #123A2B; --on-accent: #052E22;
+    --danger: #F59B93; --danger-soft: #3A1A18; --warn: #F2C46B; --warn-soft: #3A2D10;
+    --c-plastic: #6A9BFF; --c-paper: #F2B33D; --c-metal: #94A3B8; --c-glass: #3CC3DB; --c-other: #A98BF5;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.55; -webkit-text-size-adjust: 100%; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--surface); }
+  .wrap { width: 100%; max-width: 72rem; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); box-sizing: border-box; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; box-shadow: var(--shadow); }
+  :focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: .75rem; padding: .7rem 1.2rem; font-weight: 700; line-height: 1.2; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s; text-decoration: none; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+  .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn-secondary:hover:not(:disabled) { background: var(--surface-2); }
+  .btn-danger { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+  .input { width: 100%; box-sizing: border-box; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: .65rem; padding: .6rem .8rem; font: inherit; }
+  .dropzone { border: 2px dashed var(--line); border-radius: 1rem; background: var(--surface); transition: border-color .15s, background .15s; cursor: pointer; }
+  .dropzone:hover, .dropzone.is-drag { border-color: var(--accent-bright); background: var(--accent-soft); }
+  .det-box { position: absolute; border: 2px solid var(--cc); border-radius: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,.35); transition: background .1s; }
+  .det-box.is-hover { background: rgba(255,255,255,.18); border-width: 3px; }
+  .det-tag { position: absolute; left: -2px; top: -2px; max-width: calc(100% + 4px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(6,22,16,.9); color: #fff; border-left: 4px solid var(--cc); font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace; padding: 4px 6px; border-radius: 0 0 4px 0; }
+  .badge { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; padding: .2rem .65rem; font-size: .78rem; font-weight: 700; }
+  .spin { width: 18px; height: 18px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sp .8s linear infinite; }
+  .scan { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--accent-bright), transparent); box-shadow: 0 0 14px var(--accent-bright); animation: scan 1.4s ease-in-out infinite alternate; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  @keyframes scan { from { top: 0; } to { top: calc(100% - 3px); } }
+  @media (prefers-reduced-motion: reduce) { .spin, .scan { animation: none; } .scan { top: 50%; } }
+  .tabular { font-variant-numeric: tabular-nums; }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+(function () {
+  'use strict';
+  var useState = React.useState, useEffect = React.useEffect, useRef = React.useRef, useCallback = React.useCallback;
+
+  /* ============================================================
+     JSX-free helper: htm templates, `class` mapped to className
+     ============================================================ */
+  function h(type, props) {
+    var rest = Array.prototype.slice.call(arguments, 2);
+    if (props && props.class !== undefined) {
+      props = Object.assign({}, props, { className: props.class });
+      delete props.class;
+    }
+    return React.createElement.apply(null, [type, props].concat(rest));
+  }
+  var html = htm.bind(h);
+
+  /* ============================================================
+     CONFIG + DOMAIN
+     ============================================================ */
+  var DEFAULT_SETTINGS = { apiUrl: '', endpoint: '/predict', fieldName: 'file', demo: false };
+  var KEY_HISTORY = 'qs.history.v1', KEY_SETTINGS = 'qs.settings.v1';
+  var MAX_HISTORY = 50, MAX_FILE_MB = 10;
+
+  var PAGES = [
+    { id: 'home', label: 'Home' }, { id: 'analysis', label: 'AI Analysis' },
+    { id: 'dashboard', label: 'Dashboard' }, { id: 'history', label: 'History' }, { id: 'about', label: 'About' }
+  ];
+
+  var CATS = [
+    { id: 'plastic', name: 'Plastic', short: 'Plastic', desc: 'Bottles, bags, packaging and containers' },
+    { id: 'paper', name: 'Paper/Cardboard', short: 'Paper', desc: 'Boxes, sheets, newspapers and cartons' },
+    { id: 'metal', name: 'Metal', short: 'Metal', desc: 'Cans, foil, lids and metal packaging' },
+    { id: 'glass', name: 'Glass', short: 'Glass', desc: 'Bottles, jars and glass containers' },
+    { id: 'other', name: 'Other', short: 'Other', desc: 'Anything that does not fit the four groups above' }
+  ];
+  var CAT = {}; CATS.forEach(function (c) { CAT[c.id] = c; });
+  function catColor(id) { return 'var(--c-' + id + ')'; }
+
+  /* Maps whatever class name the model returns to one of the five categories. */
+  function mapCategory(label) {
+    var s = String(label).toLowerCase();
+    if (/plastic|polyethylene|\bpet\b/.test(s)) return 'plastic';
+    if (/paper|cardboard|carton|newspaper/.test(s)) return 'paper';
+    if (/metal|aluminum|aluminium|steel|\btin\b|\bcan\b/.test(s)) return 'metal';
+    if (/glass/.test(s)) return 'glass';
+    return 'other';
+  }
+
+  /* ============================================================
+     UTILS
+     ============================================================ */
+  var store = {
+    get: function (k, fb) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch (e) { return fb; } },
+    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  };
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function clamp01(n) { return Math.min(1, Math.max(0, n)); }
+  function pct(n) { return Math.round(n * 100) + '%'; }
+  function fmtDate(ts) { return new Date(ts).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  function fmtSize(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+  function countBy(dets) { var c = {}; CATS.forEach(function (k) { c[k.id] = 0; }); dets.forEach(function (d) { c[d.category]++; }); return c; }
+  function mean(dets) { return dets.length ? dets.reduce(function (s, d) { return s + d.confidence; }, 0) / dets.length : null; }
+  function aggregate(entries) {
+    var counts = countBy([]), total = 0, sum = 0;
+    entries.forEach(function (e) { e.detections.forEach(function (d) { counts[d.category]++; total++; sum += d.confidence; }); });
+    return { analyses: entries.length, total: total, counts: counts, avg: total ? sum / total : null };
+  }
+  function loadImage(url) {
+    return new Promise(function (res, rej) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { rej(new Error('decode')); }; im.src = url; });
+  }
+  function makeThumb(img, max) {
+    var s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.72);
+  }
+  function persistHistory(list) {
+    var l = list.slice(0, MAX_HISTORY);
+    while (l.length) { if (store.set(KEY_HISTORY, l)) return; l = l.slice(0, -1); }
+    store.set(KEY_HISTORY, []);
+  }
+  function niceScale(v) {
+    var steps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    for (var i = 0; i < steps.length; i++) { if (Math.ceil(v / steps[i]) <= 5) { var n = Math.max(1, Math.ceil(v / steps[i])); return { step: steps[i], n: n, max: n * steps[i] }; } }
+    return { step: v, n: 1, max: v };
+  }
+
+  /* ============================================================
+     API LAYER  —  the only place that talks to the YOLO11n backend
+     Expected: POST {apiUrl}{endpoint}  multipart/form-data, field `file`
+     Response: { detections: [ { class_name, confidence, bbox: {x1,y1,x2,y2} } ] }  (pixel coordinates)
+     Also accepted: label/class/name, conf/score, bbox as [x1,y1,x2,y2], normalised 0..1 coordinates.
+     ============================================================ */
+  function ApiError(kind, message) { this.kind = kind; this.message = message; this.name = 'ApiError'; }
+  ApiError.prototype = Object.create(Error.prototype);
+
+  function callDetectionApi(file, settings, signal) {
+    var base = settings.apiUrl.replace(/\/+$/, '');
+    var ep = settings.endpoint || '/predict';
+    var url = base + (ep.charAt(0) === '/' ? ep : '/' + ep);
+    var body = new FormData(); body.append(settings.fieldName || 'file', file);
+    var t0 = performance.now();
+    return fetch(url, { method: 'POST', body: body, signal: signal }).then(function (res) {
+      if (!res.ok) throw new ApiError('http', 'The AI backend answered with an error (HTTP ' + res.status + '). Check the server log.');
+      return res.json().catch(function () { throw new ApiError('format', 'The AI backend returned a response that is not valid JSON.'); });
+    }, function (e) {
+      if (e && e.name === 'AbortError') throw e;
+      throw new ApiError('network', 'Cannot reach the AI backend at ' + url + '. Check that the server is running, that the address is correct and that CORS allows this page.');
+    }).then(function (data) { return { raw: data, ms: Math.round(performance.now() - t0) }; });
+  }
+
+  function normalizeDetections(data, W, H) {
+    var list = Array.isArray(data) ? data : (data && (data.detections || data.predictions || data.results));
+    if (!Array.isArray(list)) throw new ApiError('format', 'The response has no "detections" list. See the response format in API settings.');
+    return list.map(function (d, i) {
+      var label = String(d.class_name != null ? d.class_name : d.label != null ? d.label : d.name != null ? d.name : d['class'] != null ? d['class'] : 'unknown');
+      var conf = Number(d.confidence != null ? d.confidence : d.conf != null ? d.conf : d.score);
+      var b = d.bbox || d.box || d.xyxy, x1, y1, x2, y2;
+      if (Array.isArray(b)) { x1 = +b[0]; y1 = +b[1]; x2 = +b[2]; y2 = +b[3]; }
+      else if (b && typeof b === 'object') { x1 = +b.x1; y1 = +b.y1; x2 = +b.x2; y2 = +b.y2; }
+      if (![x1, y1, x2, y2].every(isFinite)) return null;
+      var normalized = Math.max(x1, y1, x2, y2) <= 1.0001;
+      var fx = normalized ? 1 : W, fy = normalized ? 1 : H;
+      var nx1 = clamp01(Math.min(x1, x2) / fx), nx2 = clamp01(Math.max(x1, x2) / fx);
+      var ny1 = clamp01(Math.min(y1, y2) / fy), ny2 = clamp01(Math.max(y1, y2) / fy);
+      return { id: i, label: label, category: mapCategory(label), confidence: clamp01(isFinite(conf) ? conf : 0), box: { x: nx1, y: ny1, w: nx2 - nx1, h: ny2 - ny1 } };
+    }).filter(function (d) { return d && d.box.w > 0 && d.box.h > 0; });
+  }
+
+  /* Demo mode only: random boxes so the interface can be previewed. These are NOT model results. */
+  function simulateDetections() {
+    var n = 3 + Math.floor(Math.random() * 4), out = [], tries = 0;
+    while (out.length < n && tries < 80) {
+      tries++;
+      var w = .14 + Math.random() * .2, hh = .16 + Math.random() * .24, x = Math.random() * (1 - w), y = Math.random() * (1 - hh);
+      var hit = out.some(function (o) { var a = o.box; return x < a.x + a.w && x + w > a.x && y < a.y + a.h && y + hh > a.y; });
+      if (hit) continue;
+      var c = CATS[Math.floor(Math.random() * CATS.length)];
+      out.push({ id: out.length, label: c.name, category: c.id, confidence: +(.45 + Math.random() * .5).toFixed(2), box: { x: x, y: y, w: w, h: hh } });
+    }
+    return out;
+  }
+
+  var FASTAPI_SNIPPET = [
+    '# api.py  -  small wrapper next to your existing project (Streamlit app stays untouched)',
+    '# pip install fastapi uvicorn python-multipart ultralytics pillow',
+    'import io',
+    'from fastapi import FastAPI, UploadFile, File',
+    'from fastapi.middleware.cors import CORSMiddleware',
+    'from PIL import Image',
+    'from ultralytics import YOLO',
+    '',
+    'app = FastAPI()',
+    'app.add_middleware(CORSMiddleware, allow_origins=["*"],  # restrict in production',
+    '                   allow_methods=["*"], allow_headers=["*"])',
+    'model = YOLO("path/to/your/weights.pt")  # same weights the Streamlit app uses',
+    '',
+    '@app.post("/predict")',
+    'async def predict(file: UploadFile = File(...)):',
+    '    img = Image.open(io.BytesIO(await file.read())).convert("RGB")',
+    '    result = model(img)[0]',
+    '    detections = []',
+    '    for box in result.boxes:',
+    '        x1, y1, x2, y2 = box.xyxy[0].tolist()',
+    '        detections.append({',
+    '            "class_name": result.names[int(box.cls)],',
+    '            "confidence": float(box.conf),',
+    '            "bbox": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},',
+    '        })',
+    '    return {"image": {"width": img.width, "height": img.height}, "detections": detections}',
+    '',
+    '# run:  uvicorn api:app --port 8000'
+  ].join('\n');
+
+  /* ============================================================
+     STATE HOOKS
+     ============================================================ */
+  function useRoute() {
+    function read() { var x = (location.hash || '').replace('#', ''); return PAGES.some(function (p) { return p.id === x; }) ? x : 'home'; }
+    var st = useState(read), route = st[0], setRoute = st[1];
+    useEffect(function () {
+      function f() { setRoute(read()); window.scrollTo(0, 0); }
+      window.addEventListener('hashchange', f);
+      return function () { window.removeEventListener('hashchange', f); };
+    }, []);
+    var go = useCallback(function (id) { setRoute(id); window.scrollTo(0, 0); try { location.hash = id; } catch (e) {} }, []);
+    return [route, go];
+  }
+
+  function useAnalysis(settings, addEntry) {
+    var st = useState({ phase: 'idle', file: null, previewUrl: null, result: null, error: null }), s = st[0], setS = st[1];
+    var urlRef = useRef(null), abortRef = useRef(null);
+    function swapUrl(u) { if (urlRef.current) URL.revokeObjectURL(urlRef.current); urlRef.current = u; }
+
+    function selectFile(file) {
+      if (!file) return;
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { setS(function (p) { return Object.assign({}, p, { error: { kind: 'file', message: 'Unsupported file type. Use a JPG, PNG or WebP image.' } }); }); return; }
+      if (file.size > MAX_FILE_MB * 1048576) { setS(function (p) { return Object.assign({}, p, { error: { kind: 'file', message: 'The image is larger than ' + MAX_FILE_MB + ' MB. Choose a smaller file.' } }); }); return; }
+      var u = URL.createObjectURL(file); swapUrl(u);
+      setS({ phase: 'idle', file: file, previewUrl: u, result: null, error: null });
+    }
+    function reset() { swapUrl(null); setS({ phase: 'idle', file: null, previewUrl: null, result: null, error: null }); }
+    function openEntry(entry) { swapUrl(null); setS({ phase: 'done', file: null, previewUrl: null, result: entry, error: null }); }
+    function cancel() { if (abortRef.current) abortRef.current.abort(); }
+
+    function analyze() {
+      if (!s.file) return;
+      if (!settings.demo && !settings.apiUrl) { setS(function (p) { return Object.assign({}, p, { error: { kind: 'not-connected' } }); }); return; }
+      var ctrl = new AbortController(); abortRef.current = ctrl;
+      var file = s.file, url = s.previewUrl;
+      setS(function (p) { return Object.assign({}, p, { phase: 'loading', error: null }); });
+      loadImage(url).then(function (img) {
+        var W = img.naturalWidth, H = img.naturalHeight;
+        var job = settings.demo
+          ? sleep(900).then(function () { return { dets: simulateDetections(), ms: null }; })
+          : callDetectionApi(file, settings, ctrl.signal).then(function (r) { return { dets: normalizeDetections(r.raw, W, H), ms: r.ms }; });
+        return job.then(function (r) {
+          var entry = { id: uid(), ts: Date.now(), name: file.name, width: W, height: H, thumb: makeThumb(img, 640), detections: r.dets, demo: !!settings.demo, inferenceMs: r.ms };
+          addEntry(entry);
+          setS(function (p) { return Object.assign({}, p, { phase: 'done', result: entry }); });
+        });
+      }).catch(function (e) {
+        if (e && e.name === 'AbortError') { setS(function (p) { return Object.assign({}, p, { phase: 'idle' }); }); return; }
+        var msg = e && e.kind ? e.message : 'The image could not be read. Try another file.';
+        setS(function (p) { return Object.assign({}, p, { phase: 'idle', error: { kind: (e && e.kind) || 'unknown', message: msg } }); });
+      });
+    }
+    return { s: s, selectFile: selectFile, analyze: analyze, cancel: cancel, reset: reset, openEntry: openEntry };
+  }
+
+  function backendState(st) {
+    if (st.demo) return { kind: 'demo', label: 'Demo mode' };
+    if (st.apiUrl) { var host = st.apiUrl.replace(/^https?:\/\//, '').replace(/\/+$/, ''); return { kind: 'api', label: 'API: ' + host }; }
+    return { kind: 'off', label: 'Backend not connected' };
+  }
+
+  /* ============================================================
+     SMALL COMPONENTS
+     ============================================================ */
+  var ICONS = {
+    upload: ['M12 16V4', 'M7 9l5-5 5 5', 'M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3'],
+    arrow: ['M5 12h14', 'M13 6l6 6-6 6'],
+    sliders: ['M4 7h8', 'M16 7h4', 'M12 7a2 2 0 1 0 4 0a2 2 0 1 0 -4 0', 'M4 17h4', 'M12 17h8', 'M8 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0'],
+    trash: ['M4 7h16', 'M10 11v6', 'M14 11v6', 'M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12', 'M9 7V4h6v3'],
+    menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'], close: ['M6 6l12 12', 'M18 6L6 18'], check: ['M5 12l5 5 9-10'],
+    image: ['M4 5h16v14H4z', 'M4 16l4-4 4 3 3-3 5 5', 'M9 9.5h.01'],
+    zap: ['M13 3L5 13h6l-1 8 8-10h-6l1-8z'],
+    layers: ['M12 3l9 5-9 5-9-5 9-5z', 'M3 13l9 5 9-5'],
+    chart: ['M5 20V10', 'M12 20V4', 'M19 20v-7'],
+    clock: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M12 7v5l3 2'],
+    info: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M12 11v5', 'M12 8h.01'],
+    copy: ['M9 9h11v11H9z', 'M5 15V4h10'],
+    alert: ['M12 3l10 18H2L12 3z', 'M12 10v5', 'M12 18h.01'],
+    scan: ['M4 8V5a1 1 0 0 1 1-1h3', 'M16 4h3a1 1 0 0 1 1 1v3', 'M20 16v3a1 1 0 0 1-1 1h-3', 'M8 20H5a1 1 0 0 1-1-1v-3', 'M4 12h16']
+  };
+  function Icon(p) {
+    var size = p.size || 20;
+    return html`<svg width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" class=${p.className || ''} style=${{ flexShrink: 0 }}>
+      ${ICONS[p.name].map(function (d, i) { return html`<path key=${i} d=${d} />`; })}
+    </svg>`;
+  }
+
+  function Logo() {
+    return html`<svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="9" style=${{ fill: 'var(--brand)' }} />
+      <path d="M8 12V9a1 1 0 0 1 1-1h3M20 8h3a1 1 0 0 1 1 1v3M24 20v3a1 1 0 0 1-1 1h-3M12 24H9a1 1 0 0 1-1-1v-3" fill="none" stroke="#6EE7B7" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M12 21C12 14 16 10.5 21 10.5C21 16 18 20.5 12 21Z" fill="#34D399" />
+      <path d="M12 21L17 14.5" stroke="#0B3D2E" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>`;
+  }
+
+  function CatDot(p) { return html`<span class="inline-block shrink-0 rounded-full" style=${{ width: p.size || 10, height: p.size || 10, background: catColor(p.id) }}></span>`; }
+
+  function CatChips(p) {
+    var counts = countBy(p.detections), shown = CATS.filter(function (c) { return counts[c.id] > 0; });
+    if (!shown.length) return html`<span class="text-sm text-muted">No objects</span>`;
+    return html`<div class="flex flex-wrap gap-1.5">${shown.map(function (c) {
+      return html`<span key=${c.id} class="badge bg-surface2 text-ink"><${CatDot} id=${c.id} size=${8} />${c.short} <span class="tabular">${counts[c.id]}</span></span>`;
+    })}</div>`;
+  }
+
+  function PageHead(p) {
+    return html`<div class="flex flex-wrap items-end justify-between gap-4 pb-6 pt-8 sm:pt-10">
+      <div class="min-w-0"><h1 class="font-display text-3xl font-bold leading-tight sm:text-4xl">${p.title}</h1><p class="mt-2 max-w-2xl text-muted">${p.subtitle}</p></div>
+      ${p.right}
+    </div>`;
+  }
+
+  function BackendPill(p) {
+    var st = backendState(p.settings);
+    var cls = st.kind === 'api' ? 'bg-accentsoft text-accent' : st.kind === 'demo' ? 'bg-warnsoft text-warn' : 'bg-surface2 text-muted';
+    var dot = st.kind === 'api' ? 'var(--accent-bright)' : st.kind === 'demo' ? 'var(--warn)' : 'var(--muted)';
+    return html`<button type="button" onClick=${p.onClick} class=${'badge cursor-pointer border border-line ' + cls} title="Open API settings">
+      <span class="inline-block h-2 w-2 rounded-full" style=${{ background: dot }}></span>${st.label}
+    </button>`;
+  }
+
+  /* ============================================================
+     HEADER / FOOTER / SETTINGS
+     ============================================================ */
+  function Header(p) {
+    var st = useState(false), open = st[0], setOpen = st[1];
+    function link(page, mobile) {
+      var active = p.route === page.id;
+      var cls = 'rounded-lg px-3 py-2 text-[0.95rem] font-medium no-underline transition ' + (active ? 'bg-accentsoft text-accent' : 'text-muted hover:bg-surface2 hover:text-ink') + (mobile ? ' block' : '');
+      return html`<a key=${page.id} href=${'#' + page.id} class=${cls} aria-current=${active ? 'page' : undefined}
+        onClick=${function (e) { e.preventDefault(); setOpen(false); p.go(page.id); }}>${page.label}</a>`;
+    }
+    return html`<header class="sticky z-50 border-b border-line bg-surface" style=${{ top: 'env(safe-area-inset-top, 0px)' }}>
+      <div class="wrap flex items-center justify-between gap-3 py-3">
+        <a href="#home" class="flex items-center gap-2.5 font-display text-xl font-bold text-ink no-underline" onClick=${function (e) { e.preventDefault(); setOpen(false); p.go('home'); }}>
+          <${Logo} />QaldyqSana
+        </a>
+        <nav class="hidden items-center gap-1 md:flex" aria-label="Main">${PAGES.map(function (pg) { return link(pg, false); })}</nav>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary !px-3 !py-2" onClick=${p.onSettings} aria-label="API settings"><${Icon} name="sliders" size=${18} /><span class="hidden sm:inline">API settings</span></button>
+          <button type="button" class="btn btn-secondary !px-3 !py-2 md:hidden" aria-label="Menu" aria-expanded=${open} onClick=${function () { setOpen(!open); }}><${Icon} name=${open ? 'close' : 'menu'} size=${18} /></button>
+        </div>
+      </div>
+      ${open && html`<nav class="wrap flex flex-col gap-1 border-t border-line py-2 md:hidden" aria-label="Mobile">${PAGES.map(function (pg) { return link(pg, true); })}</nav>`}
+    </header>`;
+  }
+
+  function Footer() {
+    return html`<footer class="mt-16 border-t border-line bg-surface">
+      <div class="wrap flex flex-col gap-2 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-2.5 font-display font-bold text-ink"><${Logo} />QaldyqSana</div>
+        <p class="m-0">AI-Powered Waste Classification Platform. Frontend interface, connected to your own YOLO11n backend.</p>
+      </div>
+    </footer>`;
+  }
+
+  function SettingsDialog(p) {
+    var st = useState(p.settings), d = st[0], setD = st[1];
+    var cp = useState(''), copied = cp[0], setCopied = cp[1];
+    var er = useState(''), err = er[0], setErr = er[1];
+    var preRef = useRef(null);
+    useEffect(function () {
+      function k(e) { if (e.key === 'Escape') p.onClose(); }
+      window.addEventListener('keydown', k); return function () { window.removeEventListener('keydown', k); };
+    }, []);
+    function set(k, v) { setD(function (x) { var n = Object.assign({}, x); n[k] = v; return n; }); }
+    function save() {
+      var url = d.apiUrl.trim();
+      if (url && !/^https?:\/\/[^\s]+$/i.test(url)) { setErr('The API address must start with http:// or https://'); return; }
+      p.onSave({ apiUrl: url, endpoint: (d.endpoint || '/predict').trim(), fieldName: (d.fieldName || 'file').trim(), demo: !!d.demo });
+    }
+    function copy() {
+      var done = function () { setCopied('ok'); setTimeout(function () { setCopied(''); }, 2000); };
+      var fail = function () { setCopied('fail'); if (preRef.current) { var r = document.createRange(); r.selectNodeContents(preRef.current); var s = getSelection(); s.removeAllRanges(); s.addRange(r); } };
+      try { navigator.clipboard.writeText(FASTAPI_SNIPPET).then(done, fail); } catch (e) { fail(); }
+    }
+    return html`<div class="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/50 py-6" style=${{ paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))', paddingRight: 'max(12px, env(safe-area-inset-right, 0px))', paddingTop: 'max(24px, env(safe-area-inset-top, 0px))', paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}
+      onMouseDown=${function (e) { if (e.target === e.currentTarget) p.onClose(); }}>
+      <div class="card w-full max-w-2xl p-5 sm:p-7" role="dialog" aria-modal="true" aria-labelledby="set-title">
+        <div class="flex items-start justify-between gap-4">
+          <div><h2 id="set-title" class="m-0 font-display text-2xl font-bold">API settings</h2>
+            <p class="mt-1 text-sm text-muted">Connect this interface to your existing YOLO11n backend. Nothing is connected until you add an address.</p></div>
+          <button type="button" class="btn btn-secondary !px-2.5 !py-2" onClick=${p.onClose} aria-label="Close"><${Icon} name="close" size=${18} /></button>
+        </div>
+
+        <div class="mt-5 grid gap-4">
+          <div><label htmlFor="api-url" class="mb-1 block text-sm font-bold">API base URL</label>
+            <input id="api-url" class="input" type="url" placeholder="http://localhost:8000" value=${d.apiUrl} onChange=${function (e) { setErr(''); set('apiUrl', e.target.value); }} onInput=${function (e) { setErr(''); set('apiUrl', e.target.value); }} /></div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div><label htmlFor="api-ep" class="mb-1 block text-sm font-bold">Endpoint</label><input id="api-ep" class="input" value=${d.endpoint} onInput=${function (e) { set('endpoint', e.target.value); }} /></div>
+            <div><label htmlFor="api-field" class="mb-1 block text-sm font-bold">Upload field name</label><input id="api-field" class="input" value=${d.fieldName} onInput=${function (e) { set('fieldName', e.target.value); }} /></div>
+          </div>
+          ${err && html`<p class="m-0 text-sm font-bold text-danger" role="alert">${err}</p>`}
+          <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface2 p-3" htmlFor="demo-mode">
+            <input id="demo-mode" type="checkbox" class="mt-1 h-4 w-4 shrink-0" checked=${!!d.demo} onChange=${function (e) { set('demo', e.target.checked); }} />
+            <span class="text-sm"><b>Demo mode</b><br /><span class="text-muted">Draws simulated detections so you can try the interface without a backend. These results are not produced by YOLO11n and are marked "Demo" everywhere.</span></span>
+          </label>
+        </div>
+
+        <h3 class="mb-2 mt-6 font-display text-lg font-bold">What the backend should return</h3>
+        <p class="m-0 text-sm text-muted">The interface sends the image as <code>multipart/form-data</code> to <code>POST {base URL}{endpoint}</code> and expects JSON with pixel coordinates. Class names are matched to the five categories by keyword (plastic, paper/cardboard, metal, glass); anything else becomes Other. The backend must allow cross-origin requests (CORS).</p>
+        <div class="mt-3 flex items-center justify-between gap-2">
+          <span class="text-sm font-bold">Example FastAPI wrapper</span>
+          <button type="button" class="btn btn-secondary !px-3 !py-1.5 !text-sm" onClick=${copy}><${Icon} name=${copied === 'ok' ? 'check' : 'copy'} size=${16} />${copied === 'ok' ? 'Copied' : copied === 'fail' ? 'Select and copy' : 'Copy'}</button>
+        </div>
+        <pre ref=${preRef} class="mt-2 max-h-72 overflow-auto rounded-xl bg-surface2 p-3 text-xs leading-relaxed" style=${{ userSelect: 'text', fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>${FASTAPI_SNIPPET}</pre>
+
+        <div class="mt-6 flex flex-wrap justify-end gap-2">
+          <button type="button" class="btn btn-secondary" onClick=${p.onClose}>Cancel</button>
+          <button type="button" class="btn btn-primary" onClick=${save}>Save settings</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ============================================================
+     PAGE: HOME
+     ============================================================ */
+  function Tag(p) {
+    return html`<g><rect x=${p.x} y=${p.y} width=${p.w} height="18" rx="3" fill="rgba(6,22,16,.92)" /><rect x=${p.x} y=${p.y} width="4" height="18" rx="1" style=${{ fill: catColor(p.c) }} />
+      <text x=${p.x + 10} y=${p.y + 12.5} fill="#fff" fontSize="11" fontFamily="'JetBrains Mono', monospace">${p.label}</text></g>`;
+  }
+  function Box(p) { return html`<rect x=${p.x} y=${p.y} width=${p.w} height=${p.h} rx="4" fill="none" strokeWidth="2" strokeDasharray="6 4" style=${{ stroke: catColor(p.c) }} />`; }
+
+  function RecognitionIllustration() {
+    return html`<div class="rounded-2xl bg-surface p-3 text-ink shadow-lg sm:p-4">
+      <svg viewBox="0 0 480 290" class="block h-auto w-full" role="img" aria-label="Illustration: a plastic bottle, a metal can, a glass jar and a paper stack, each outlined by a detection box with its category">
+        <rect width="480" height="290" rx="12" style=${{ fill: 'var(--surface-2)' }} />
+        <rect y="232" width="480" height="58" style=${{ fill: 'var(--line)' }} />
+        <rect x="78" y="94" width="14" height="24" rx="3" style=${{ fill: 'var(--c-plastic)', fillOpacity: .5, stroke: 'var(--c-plastic)' }} />
+        <rect x="75" y="86" width="20" height="10" rx="2" style=${{ fill: 'var(--c-plastic)' }} />
+        <rect x="64" y="116" width="42" height="114" rx="14" style=${{ fill: 'var(--c-plastic)', fillOpacity: .35, stroke: 'var(--c-plastic)' }} />
+        <${Box} x=${50} y=${78} w=${70} h=${160} c="plastic" /><${Tag} x=${50} y=${58} w=${68} label="Plastic" c="plastic" />
+        <rect x="152" y="150" width="52" height="80" rx="6" style=${{ fill: 'var(--c-metal)', fillOpacity: .55, stroke: 'var(--c-metal)' }} />
+        <ellipse cx="178" cy="150" rx="26" ry="5" style=${{ fill: 'var(--c-metal)' }} />
+        <${Box} x=${140} y=${134} w=${76} h=${104} c="metal" /><${Tag} x=${140} y=${114} w=${58} label="Metal" c="metal" />
+        <rect x="258" y="128" width="44" height="14" rx="3" style=${{ fill: 'var(--c-glass)' }} />
+        <rect x="252" y="140" width="56" height="90" rx="12" style=${{ fill: 'var(--c-glass)', fillOpacity: .28, stroke: 'var(--c-glass)' }} />
+        <${Box} x=${240} y=${112} w=${80} h=${126} c="glass" /><${Tag} x=${240} y=${92} w=${56} label="Glass" c="glass" />
+        <rect x="354" y="198" width="80" height="32" rx="2" style=${{ fill: 'var(--c-paper)', fillOpacity: .5, stroke: 'var(--c-paper)' }} />
+        <rect x="360" y="184" width="70" height="16" rx="2" style=${{ fill: 'var(--c-paper)', fillOpacity: .7, stroke: 'var(--c-paper)' }} />
+        <rect x="366" y="172" width="58" height="14" rx="2" style=${{ fill: 'var(--c-paper)', fillOpacity: .9, stroke: 'var(--c-paper)' }} />
+        <${Box} x=${342} y=${156} w=${104} h=${82} c="paper" /><${Tag} x=${342} y=${136} w=${56} label="Paper" c="paper" />
+      </svg>
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <div class="flex flex-wrap items-center gap-2 font-medium"><span class="badge bg-surface2">Upload photo</span><${Icon} name="arrow" size=${16} /><span class="badge bg-surface2">Detect objects</span><${Icon} name="arrow" size=${16} /><span class="badge bg-accentsoft text-accent">Sort by category</span></div>
+        <span class="text-xs text-muted">Illustration</span>
+      </div>
+    </div>`;
+  }
+
+  function HomePage(p) {
+    var benefits = [
+      { icon: 'zap', t: 'Faster sorting decisions', d: 'A photo is enough. The model finds every object in the frame instead of a person checking items one by one.' },
+      { icon: 'layers', t: 'Five clear categories', d: 'Plastic, Paper/Cardboard, Metal, Glass and Other, so results map directly to common sorting bins.' },
+      { icon: 'chart', t: 'Statistics from real results', d: 'Every analysis is saved. The dashboard counts what was actually detected, nothing is pre-filled.' },
+      { icon: 'scan', t: 'Lightweight YOLO11n model', d: 'A compact detection model that your existing backend already runs. This interface only connects to it.' }
+    ];
+    return html`<div>
+      <section class="wrap pt-6 sm:pt-8">
+        <div class="grid items-center gap-8 rounded-3xl bg-brand p-6 text-white sm:p-10 lg:grid-cols-2 lg:gap-12 lg:p-14">
+          <div class="min-w-0">
+            <p class="m-0 font-mono text-xs uppercase tracking-[0.14em]" style=${{ color: '#7EE2B8' }}>AI-powered waste classification</p>
+            <h1 class="mt-4 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl lg:text-[3.4rem]">Smarter Waste Sorting Starts Here</h1>
+            <p class="mt-5 max-w-lg text-lg" style=${{ color: '#CBE7DA' }}>QaldyqSana uses computer vision and YOLO to find waste in a photo and sort every object into Plastic, Paper/Cardboard, Metal, Glass or Other.</p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button type="button" class="btn !bg-white !text-[#0B3D2E] hover:!bg-[#E8F7EF]" onClick=${function () { p.go('analysis'); }}>Start Analysis<${Icon} name="arrow" size=${18} /></button>
+              <button type="button" class="btn !border-white/40 !text-white hover:!bg-white/10" onClick=${function () { p.go('about'); }}>How it works</button>
+            </div>
+          </div>
+          <${RecognitionIllustration} />
+        </div>
+      </section>
+
+      <section class="wrap pt-14">
+        <h2 class="m-0 font-display text-2xl font-bold sm:text-3xl">Why sort with AI</h2>
+        <p class="mt-2 max-w-2xl text-muted">What automatic recognition adds to everyday waste sorting.</p>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          ${benefits.map(function (b) {
+            return html`<div key=${b.t} class="card p-5">
+              <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accentsoft text-accent"><${Icon} name=${b.icon} size=${22} /></div>
+              <h3 class="m-0 font-display text-lg font-bold leading-snug">${b.t}</h3><p class="mb-0 mt-2 text-sm text-muted">${b.d}</p></div>`;
+          })}
+        </div>
+      </section>
+
+      <section class="wrap pt-14">
+        <div class="card flex flex-col items-start justify-between gap-5 p-6 sm:flex-row sm:items-center sm:p-8">
+          <div class="min-w-0"><h2 class="m-0 font-display text-2xl font-bold">Have a photo of waste?</h2><p class="mb-0 mt-1 text-muted">Upload it and see each object, its category and the model's confidence.</p></div>
+          <button type="button" class="btn btn-primary shrink-0" onClick=${function () { p.go('analysis'); }}>Start Analysis<${Icon} name="arrow" size=${18} /></button>
+        </div>
+      </section>
+    </div>`;
+  }
+
+  /* ============================================================
+     PAGE: AI ANALYSIS
+     ============================================================ */
+  function ResultView(p) {
+    var hs = useState(null), hover = hs[0], setHover = hs[1];
+    var e = p.entry, dets = e.detections, counts = countBy(dets), avg = mean(dets);
+    var maxCount = Math.max.apply(null, CATS.map(function (c) { return counts[c.id]; }).concat([1]));
+    var empty = dets.length === 0;
+    return html`<div class="grid gap-6 lg:grid-cols-5">
+      <div class="min-w-0 lg:col-span-3">
+        <div class="card p-3 sm:p-4">
+          <div class="flex justify-center rounded-xl bg-surface2">
+            <div class="relative inline-block max-w-full overflow-hidden rounded-xl">
+              <img src=${p.src} alt=${'Analyzed image ' + e.name} class="block h-auto max-h-[70vh] w-auto max-w-full" />
+              ${dets.map(function (d) {
+                return html`<div key=${d.id} class=${'det-box' + (hover === d.id ? ' is-hover' : '')} style=${{ left: d.box.x * 100 + '%', top: d.box.y * 100 + '%', width: d.box.w * 100 + '%', height: d.box.h * 100 + '%', '--cc': catColor(d.category) }}>
+                  <span class="det-tag">${CAT[d.category].short} ${pct(d.confidence)}</span></div>`;
+              })}
+            </div>
+          </div>
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-2 px-1 text-sm text-muted">
+            <span class="min-w-0 truncate">${e.name}</span><span class="tabular">${e.width} × ${e.height} px</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid min-w-0 content-start gap-4 lg:col-span-2">
+        ${e.demo && html`<div class="flex items-start gap-2.5 rounded-xl bg-warnsoft p-3 text-sm text-warn"><${Icon} name="alert" size=${18} /><span><b>Demo result.</b> These boxes are simulated, not produced by YOLO11n.</span></div>`}
+
+        ${empty ? html`<div class="card p-5">
+          <div class="flex items-center gap-2 font-display text-lg font-bold"><${Icon} name="info" size=${20} />No waste objects detected</div>
+          <p class="mb-0 mt-2 text-sm text-muted">The model did not find any of the five categories in this image. Try a photo with better light, objects closer to the camera and a plain background. If the image does contain waste, the backend may need a lower confidence threshold.</p></div>`
+        : html`<div class="card p-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div><div class="text-sm text-muted">Objects detected</div><div class="font-display text-4xl font-bold tabular">${dets.length}</div></div>
+            <div><div class="text-sm text-muted">Average confidence</div><div class="font-display text-4xl font-bold tabular">${pct(avg)}</div></div>
+          </div>
+          ${e.inferenceMs != null && html`<div class="mt-3 text-xs text-muted tabular">Backend response time: ${e.inferenceMs} ms</div>`}
+        </div>`}
+
+        <div class="card p-5">
+          <h3 class="m-0 font-display text-lg font-bold">Distribution by category</h3>
+          <ul class="m-0 mt-3 grid list-none gap-3 p-0">
+            ${CATS.map(function (c) {
+              return html`<li key=${c.id}><div class="flex items-center justify-between gap-2 text-sm"><span class="flex items-center gap-2"><${CatDot} id=${c.id} />${c.name}</span><span class="font-bold tabular">${counts[c.id]}</span></div>
+                <div class="mt-1 h-2 overflow-hidden rounded-full bg-surface2"><div class="h-full rounded-full" style=${{ width: counts[c.id] / maxCount * 100 + '%', background: catColor(c.id) }}></div></div></li>`;
+            })}
+          </ul>
+        </div>
+
+        ${!empty && html`<div class="card p-5">
+          <h3 class="m-0 font-display text-lg font-bold">Detected objects</h3>
+          <ul class="m-0 mt-3 grid list-none gap-1 p-0">
+            ${dets.map(function (d, i) {
+              return html`<li key=${d.id} onMouseEnter=${function () { setHover(d.id); }} onMouseLeave=${function () { setHover(null); }}
+                class=${'flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm ' + (hover === d.id ? 'bg-surface2' : '')}>
+                <span class="flex min-w-0 items-center gap-2"><${CatDot} id=${d.category} /><span class="truncate"><b>${CAT[d.category].name}</b>${d.label.toLowerCase() !== CAT[d.category].name.toLowerCase() && d.label.toLowerCase() !== CAT[d.category].short.toLowerCase() ? html`<span class="text-muted"> · ${d.label}</span>` : null}</span></span>
+                <span class="font-mono tabular">${pct(d.confidence)}</span></li>`;
+            })}
+          </ul>
+        </div>`}
+      </div>
+    </div>`;
+  }
+
+  function AnalysisPage(p) {
+    var an = p.an, s = an.s, st = useState(false), drag = st[0], setDrag = st[1], inputRef = useRef(null);
+    var loading = s.phase === 'loading';
+    function onDrop(e) { e.preventDefault(); setDrag(false); var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) an.selectFile(f); }
+    var err = s.error;
+
+    var errorBox = !err ? null : err.kind === 'not-connected'
+      ? html`<div class="card mb-6 border-l-4 p-5" style=${{ borderLeftColor: 'var(--warn)' }} role="alert">
+          <div class="flex items-center gap-2 font-display text-lg font-bold"><${Icon} name="alert" size=${20} />The AI backend is not connected yet</div>
+          <p class="mb-0 mt-2 text-sm text-muted">Add the address of your YOLO11n API to run real analysis. To only look around the interface, switch on Demo mode: it draws simulated boxes, marked as demo everywhere.</p>
+          <div class="mt-4 flex flex-wrap gap-2"><button type="button" class="btn btn-primary" onClick=${p.openSettings}><${Icon} name="sliders" size=${18} />Open API settings</button><button type="button" class="btn btn-secondary" onClick=${p.enableDemo}>Use demo mode</button></div></div>`
+      : html`<div class="card mb-6 border-l-4 p-5" style=${{ borderLeftColor: 'var(--danger)' }} role="alert">
+          <div class="flex items-center gap-2 font-display text-lg font-bold text-danger"><${Icon} name="alert" size=${20} />${err.kind === 'file' ? 'This file cannot be used' : 'Analysis failed'}</div>
+          <p class="mb-0 mt-2 text-sm">${err.message}</p>
+          ${err.kind === 'network' && html`<button type="button" class="btn btn-secondary mt-4" onClick=${p.openSettings}><${Icon} name="sliders" size=${18} />Check API settings</button>`}</div>`;
+
+    var body;
+    if (s.result) {
+      body = html`<div>
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-sm text-muted"><${Icon} name="check" size=${18} className="text-accent" />Saved to History · ${fmtDate(s.result.ts)}</div>
+          <button type="button" class="btn btn-secondary" onClick=${an.reset}><${Icon} name="upload" size=${18} />Analyze another image</button>
+        </div>
+        <${ResultView} entry=${s.result} src=${s.previewUrl || s.result.thumb} />
+      </div>`;
+    } else if (!s.file) {
+      body = html`<div class="dropzone p-8 text-center sm:p-14 ${drag ? 'is-drag' : ''}" role="button" tabindex="0"
+        onClick=${function () { inputRef.current && inputRef.current.click(); }}
+        onKeyDown=${function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current && inputRef.current.click(); } }}
+        onDragOver=${function (e) { e.preventDefault(); setDrag(true); }} onDragLeave=${function () { setDrag(false); }} onDrop=${onDrop}
+        style=${drag ? { borderColor: 'var(--accent-bright)', background: 'var(--accent-soft)' } : null}>
+        <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accentsoft text-accent"><${Icon} name="upload" size=${28} /></div>
+        <p class="m-0 font-display text-xl font-bold">Drag and drop a photo of waste</p>
+        <p class="mb-0 mt-1 text-muted">or <span class="font-bold text-accent underline">choose a file</span> · JPG, PNG or WebP, up to ${MAX_FILE_MB} MB</p>
+      </div>`;
+    } else {
+      body = html`<div class="grid gap-6 lg:grid-cols-5">
+        <div class="card min-w-0 p-3 sm:p-4 lg:col-span-3">
+          <div class="flex justify-center rounded-xl bg-surface2"><div class="relative inline-block max-w-full overflow-hidden rounded-xl">
+            <img src=${s.previewUrl} alt="Selected image preview" class="block h-auto max-h-[60vh] w-auto max-w-full" />
+            ${loading && html`<div class="scan" aria-hidden="true"></div>`}
+          </div></div>
+        </div>
+        <div class="card flex min-w-0 flex-col gap-4 self-start p-5 lg:col-span-2">
+          <div class="flex items-start gap-3"><div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface2 text-muted"><${Icon} name="image" size=${22} /></div>
+            <div class="min-w-0"><div class="truncate font-bold">${s.file.name}</div><div class="text-sm text-muted tabular">${fmtSize(s.file.size)}</div></div></div>
+          <button type="button" class="btn btn-primary w-full" disabled=${loading} onClick=${an.analyze}>${loading ? html`<span class="spin" aria-hidden="true"></span>Analyzing…` : html`<${Icon} name="scan" size=${18} />Analyze Image`}</button>
+          ${loading ? html`<button type="button" class="btn btn-secondary w-full" onClick=${an.cancel}>Cancel</button>` : html`<button type="button" class="btn btn-secondary w-full" onClick=${an.reset}>Choose another image</button>`}
+          <p class="m-0 text-xs text-muted">${p.settings.demo ? 'Demo mode is on: results will be simulated.' : p.settings.apiUrl ? 'The image is sent to your AI backend for analysis.' : 'No backend is connected yet. Add one in API settings.'}</p>
+        </div>
+      </div>`;
+    }
+
+    return html`<div class="wrap pb-4">
+      <${PageHead} title="AI Analysis" subtitle="Upload a photo and see each detected object, its category and confidence score."
+        right=${html`<${BackendPill} settings=${p.settings} onClick=${p.openSettings} />`} />
+      ${errorBox}
+      <input ref=${inputRef} id="file-input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" aria-label="Choose an image"
+        onChange=${function (e) { an.selectFile(e.target.files && e.target.files[0]); e.target.value = ''; }} />
+      ${body}
+    </div>`;
+  }
+
+  /* ============================================================
+     PAGE: DASHBOARD
+     ============================================================ */
+  function Donut(p) {
+    var R = 70, C = 2 * Math.PI * R, total = p.total;
+    var segs = CATS.filter(function (c) { return p.counts[c.id] > 0; }), offset = 0, gap = segs.length > 1 ? 3 : 0;
+    return html`<div class="relative mx-auto aspect-square w-full max-w-[240px]">
+      <svg viewBox="0 0 200 200" class="block h-full w-full" role="img" aria-label="Donut chart of waste distribution">
+        <circle cx="100" cy="100" r=${R} fill="none" strokeWidth="26" style=${{ stroke: 'var(--surface-2)' }} />
+        <g transform="rotate(-90 100 100)">
+          ${segs.map(function (c) {
+            var len = p.counts[c.id] / total * C, el = html`<circle key=${c.id} cx="100" cy="100" r=${R} fill="none" strokeWidth="26" strokeDasharray=${Math.max(len - gap, 0.5) + ' ' + (C - Math.max(len - gap, 0.5))} strokeDashoffset=${-offset} style=${{ stroke: catColor(c.id) }} />`;
+            offset += len; return el;
+          })}
+        </g>
+      </svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="font-display text-4xl font-bold tabular">${total}</div><div class="text-xs text-muted">objects</div></div>
+    </div>`;
+  }
+
+  function BarChart(p) {
+    var maxV = Math.max.apply(null, CATS.map(function (c) { return p.counts[c.id]; })), sc = niceScale(maxV);
+    var ticks = []; for (var i = 0; i <= sc.n; i++) ticks.push(i * sc.step);
+    return html`<div>
+      <div class="flex gap-2">
+        <div class="relative h-56 w-9 shrink-0" aria-hidden="true">${ticks.map(function (t) { return html`<span key=${t} class="absolute right-0 translate-y-1/2 text-xs text-muted tabular" style=${{ bottom: t / sc.max * 100 + '%' }}>${t}</span>`; })}</div>
+        <div class="relative h-56 min-w-0 flex-1" role="img" aria-label="Bar chart of objects per category">
+          ${ticks.map(function (t) { return html`<div key=${t} class="absolute left-0 right-0 border-t border-line" style=${{ bottom: t / sc.max * 100 + '%' }}></div>`; })}
+          <div class="absolute inset-0 flex items-end gap-2 px-1 sm:gap-4">
+            ${CATS.map(function (c) {
+              var v = p.counts[c.id];
+              return html`<div key=${c.id} class="flex h-full min-w-0 flex-1 items-end justify-center"><div class="relative w-full max-w-[56px] rounded-t-md" style=${{ height: v / sc.max * 100 + '%', background: catColor(c.id) }}>
+                <span class="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 text-sm font-bold tabular">${v}</span></div></div>`;
+            })}
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2"><div class="w-9 shrink-0"></div><div class="flex min-w-0 flex-1 gap-2 px-1 pt-2 sm:gap-4">${CATS.map(function (c) { return html`<div key=${c.id} class="min-w-0 flex-1 truncate text-center text-xs text-muted">${c.short}</div>`; })}</div></div>
+    </div>`;
+  }
+
+  function DashboardPage(p) {
+    var inc = useState(false), includeDemo = inc[0], setInc = inc[1];
+    var demoCount = p.history.filter(function (e) { return e.demo; }).length;
+    var used = p.history.filter(function (e) { return includeDemo || !e.demo; });
+    var agg = aggregate(used);
+    var toggle = demoCount > 0 ? html`<label htmlFor="inc-demo" class="flex cursor-pointer items-center gap-2 text-sm"><input id="inc-demo" type="checkbox" checked=${includeDemo} onChange=${function (e) { setInc(e.target.checked); }} class="h-4 w-4" />Include ${demoCount} demo ${demoCount === 1 ? 'analysis' : 'analyses'}</label>` : null;
+
+    var content;
+    if (agg.analyses === 0) {
+      content = html`<div class="card p-8 text-center sm:p-12">
+        <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-surface2 text-muted"><${Icon} name="chart" size=${28} /></div>
+        <h2 class="m-0 font-display text-xl font-bold">No analyses to show yet</h2>
+        <p class="mx-auto mb-0 mt-2 max-w-md text-muted">${demoCount > 0 ? 'The only saved results are demo results, which are left out of the statistics. Include them above, or connect your backend and analyze real images.' : 'The dashboard is calculated from your saved analysis results. Analyze an image and the numbers appear here.'}</p>
+        <button type="button" class="btn btn-primary mt-6" onClick=${function () { p.go('analysis'); }}>Start Analysis<${Icon} name="arrow" size=${18} /></button></div>`;
+    } else {
+      content = html`<div class="grid gap-6">
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="card p-5"><div class="text-sm text-muted">Total Detected Objects</div><div class="mt-1 font-display text-4xl font-bold tabular">${agg.total}</div></div>
+          <div class="card p-5"><div class="text-sm text-muted">Average confidence</div><div class="mt-1 font-display text-4xl font-bold tabular">${agg.avg == null ? '–' : pct(agg.avg)}</div></div>
+          <div class="card p-5"><div class="text-sm text-muted">Analyses</div><div class="mt-1 font-display text-4xl font-bold tabular">${agg.analyses}</div></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          ${CATS.map(function (c) {
+            return html`<div key=${c.id} class="card p-4"><div class="flex items-center gap-2 text-sm text-muted"><${CatDot} id=${c.id} />${c.name}</div>
+              <div class="mt-1 font-display text-3xl font-bold tabular">${agg.counts[c.id]}</div>
+              <div class="text-xs text-muted tabular">${agg.total ? pct(agg.counts[c.id] / agg.total) : '0%'} of objects</div></div>`;
+          })}
+        </div>
+        ${agg.total === 0 ? html`<div class="card p-6 text-center text-muted">The saved analyses found no objects, so there is nothing to chart yet.</div>` : html`<div class="grid gap-6 lg:grid-cols-2">
+          <div class="card min-w-0 p-5 sm:p-6"><h2 class="m-0 font-display text-lg font-bold">Waste distribution</h2>
+            <div class="mt-5 grid items-center gap-6 sm:grid-cols-2"><${Donut} counts=${agg.counts} total=${agg.total} />
+              <ul class="m-0 grid list-none gap-2 p-0">${CATS.map(function (c) { return html`<li key=${c.id} class="flex items-center justify-between gap-2 text-sm"><span class="flex items-center gap-2"><${CatDot} id=${c.id} />${c.name}</span><span class="tabular text-muted">${pct(agg.counts[c.id] / agg.total)}</span></li>`; })}</ul></div></div>
+          <div class="card min-w-0 p-5 sm:p-6"><h2 class="m-0 font-display text-lg font-bold">Objects per category</h2><div class="mt-6"><${BarChart} counts=${agg.counts} /></div></div>
+        </div>`}
+        <p class="m-0 text-sm text-muted">Calculated from ${agg.analyses} saved ${agg.analyses === 1 ? 'analysis' : 'analyses'} in this browser. Nothing on this page is sample data.</p>
+      </div>`;
+    }
+    return html`<div class="wrap pb-4"><${PageHead} title="Dashboard" subtitle="Totals and distribution across all of your saved analyses." right=${toggle} />${content}</div>`;
+  }
+
+  /* ============================================================
+     PAGE: HISTORY
+     ============================================================ */
+  function HistoryPage(p) {
+    var cs = useState(null), confirmId = cs[0], setConfirmId = cs[1];
+    var ca = useState(false), confirmAll = ca[0], setConfirmAll = ca[1];
+    var list = p.history;
+    var right = list.length ? (confirmAll
+      ? html`<div class="flex items-center gap-2"><span class="text-sm">Delete all ${list.length}?</span><button type="button" class="btn btn-danger !py-2" onClick=${function () { p.onClear(); setConfirmAll(false); }}>Delete all</button><button type="button" class="btn btn-secondary !py-2" onClick=${function () { setConfirmAll(false); }}>Cancel</button></div>`
+      : html`<button type="button" class="btn btn-secondary" onClick=${function () { setConfirmAll(true); }}><${Icon} name="trash" size=${18} />Clear history</button>`) : null;
+
+    var content = !list.length
+      ? html`<div class="card p-8 text-center sm:p-12">
+          <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-surface2 text-muted"><${Icon} name="clock" size=${28} /></div>
+          <h2 class="m-0 font-display text-xl font-bold">No analyses yet</h2>
+          <p class="mx-auto mb-0 mt-2 max-w-md text-muted">Every completed analysis is saved here with its date, image name and detected categories.</p>
+          <button type="button" class="btn btn-primary mt-6" onClick=${function () { p.go('analysis'); }}>Start Analysis<${Icon} name="arrow" size=${18} /></button></div>`
+      : html`<ul class="m-0 grid list-none gap-3 p-0">${list.map(function (e) {
+          var confirming = confirmId === e.id;
+          return html`<li key=${e.id} class="card flex flex-wrap items-center gap-4 p-3 sm:p-4">
+            <img src=${e.thumb} alt="" class="h-16 w-20 shrink-0 rounded-lg bg-surface2 object-cover" />
+            <div class="min-w-0 flex-1 basis-52">
+              <div class="flex flex-wrap items-center gap-2"><span class="min-w-0 truncate font-bold">${e.name}</span>${e.demo && html`<span class="badge bg-warnsoft text-warn">Demo</span>`}</div>
+              <div class="mb-2 text-sm text-muted tabular">${fmtDate(e.ts)}</div>
+              <${CatChips} detections=${e.detections} />
+            </div>
+            <div class="text-center"><div class="font-display text-2xl font-bold tabular">${e.detections.length}</div><div class="text-xs text-muted">${e.detections.length === 1 ? 'object' : 'objects'}</div></div>
+            <div class="flex items-center gap-2">
+              ${confirming ? html`<button type="button" class="btn btn-danger !py-2" onClick=${function () { p.onDelete(e.id); setConfirmId(null); }}>Delete</button><button type="button" class="btn btn-secondary !py-2" onClick=${function () { setConfirmId(null); }}>Cancel</button>`
+              : html`<button type="button" class="btn btn-primary !py-2" onClick=${function () { p.onOpen(e); }}>Open</button><button type="button" class="btn btn-secondary !px-3 !py-2" aria-label=${'Delete ' + e.name} onClick=${function () { setConfirmId(e.id); }}><${Icon} name="trash" size=${18} /></button>`}
+            </div></li>`;
+        })}</ul>`;
+    return html`<div class="wrap pb-4"><${PageHead} title="History" subtitle="Your previous analyses, newest first. Open one to see its boxes and categories again." right=${right} />${content}
+      ${list.length > 0 && html`<p class="mb-0 mt-4 text-sm text-muted">Stored in this browser only. Up to ${MAX_HISTORY} analyses are kept, with a reduced-size copy of each image.</p>`}</div>`;
+  }
+
+  /* ============================================================
+     PAGE: ABOUT
+     ============================================================ */
+  function AboutPage(p) {
+    var steps = [
+      { t: 'Image Upload', d: 'You add a photo of waste in the browser.' },
+      { t: 'YOLO Detection', d: 'The YOLO11n model finds every object and draws a box around it.' },
+      { t: 'Classification', d: 'Each object is assigned to one of five categories with a confidence score.' },
+      { t: 'Results', d: 'Boxes, categories and counts are shown, saved and added to the dashboard.' }
+    ];
+    var tech = [
+      { t: 'Python', d: 'Language of the model code and the backend.' },
+      { t: 'YOLO11n', d: 'Compact object-detection model that finds and classifies waste in a single pass.' },
+      { t: 'Computer Vision', d: 'The field of teaching software to locate and recognize objects in images.' },
+      { t: 'Streamlit', d: 'Your existing app with the working model. It stays as it is.' }
+    ];
+    return html`<div class="wrap pb-4">
+      <${PageHead} title="About the project" subtitle="What QaldyqSana is, why it exists and how an image becomes a sorted result." />
+      <div class="grid gap-6 lg:grid-cols-2">
+        <section class="card p-6"><h2 class="m-0 font-display text-xl font-bold">What is QaldyqSana</h2>
+          <p class="mb-0 mt-3 text-muted">QaldyqSana is an AI-powered waste classification platform. It uses computer vision and the YOLO11n detection model to find waste objects in a photo and sort them into five categories. This web interface is a separate frontend for that system.</p></section>
+        <section class="card p-6"><h2 class="m-0 font-display text-xl font-bold">Goal and relevance</h2>
+          <p class="mb-0 mt-3 text-muted">Waste only gets recycled when it is sorted correctly, and sorting by eye is slow and inconsistent. The project aims to make that first step automatic: recognize what is in a photo, group it by material and keep statistics that show what kinds of waste appear most often.</p></section>
+      </div>
+
+      <section class="pt-12"><h2 class="m-0 font-display text-2xl font-bold">How the system works</h2>
+        <ol class="m-0 mt-5 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-4">
+          ${steps.map(function (s, i) {
+            return html`<li key=${s.t} class="card relative p-5"><div class="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-accentsoft font-mono text-sm font-bold text-accent">${i + 1}</div>
+              <h3 class="m-0 font-display text-lg font-bold">${s.t}</h3><p class="mb-0 mt-1 text-sm text-muted">${s.d}</p></li>`;
+          })}
+        </ol></section>
+
+      <section class="pt-12"><h2 class="m-0 font-display text-2xl font-bold">Technologies</h2>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">${tech.map(function (t) { return html`<div key=${t.t} class="card p-5"><h3 class="m-0 font-display text-lg font-bold">${t.t}</h3><p class="mb-0 mt-1 text-sm text-muted">${t.d}</p></div>`; })}</div>
+        <p class="mb-0 mt-4 text-sm text-muted">This interface is built with React and Tailwind CSS and talks to the AI backend over an HTTP API.</p></section>
+
+      <section class="pt-12"><h2 class="m-0 font-display text-2xl font-bold">Five categories</h2>
+        <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          ${CATS.map(function (c) { return html`<div key=${c.id} class="card p-5"><div class="mb-3 h-1.5 w-10 rounded-full" style=${{ background: catColor(c.id) }}></div><h3 class="m-0 font-display text-lg font-bold">${c.name}</h3><p class="mb-0 mt-1 text-sm text-muted">${c.desc}</p></div>`; })}
+        </div></section>
+
+      <section class="pt-12"><div class="card flex flex-col items-start justify-between gap-4 p-6 sm:flex-row sm:items-center">
+        <div class="min-w-0"><h2 class="m-0 font-display text-xl font-bold">Connecting your model</h2><p class="mb-0 mt-1 text-muted">Your Streamlit app and YOLO11n weights are not modified. Add the API address of a small wrapper around the same model and this interface will use it.</p></div>
+        <button type="button" class="btn btn-secondary shrink-0" onClick=${p.openSettings}><${Icon} name="sliders" size=${18} />API settings</button></div></section>
+    </div>`;
+  }
+
+  /* ============================================================
+     APP
+     ============================================================ */
+  function App() {
+    var rt = useRoute(), route = rt[0], go = rt[1];
+    var hs = useState(function () { var l = store.get(KEY_HISTORY, []); return Array.isArray(l) ? l : []; }), history = hs[0], setHistory = hs[1];
+    var ss = useState(function () { return Object.assign({}, DEFAULT_SETTINGS, store.get(KEY_SETTINGS, {})); }), settings = ss[0], setSettings = ss[1];
+    var dl = useState(false), dialog = dl[0], setDialog = dl[1];
+
+    function addEntry(e) { setHistory(function (h0) { var n = [e].concat(h0).slice(0, MAX_HISTORY); persistHistory(n); return n; }); }
+    function deleteEntry(id) { setHistory(function (h0) { var n = h0.filter(function (e) { return e.id !== id; }); persistHistory(n); return n; }); }
+    function clearAll() { setHistory([]); persistHistory([]); }
+    function saveSettings(n) { setSettings(n); store.set(KEY_SETTINGS, n); setDialog(false); }
+    function enableDemo() { saveSettings(Object.assign({}, settings, { demo: true })); }
+
+    var an = useAnalysis(settings, addEntry);
+    function openEntry(e) { an.openEntry(e); go('analysis'); }
+    function openSettings() { setDialog(true); }
+
+    var page;
+    if (route === 'analysis') page = html`<${AnalysisPage} an=${an} settings=${settings} openSettings=${openSettings} enableDemo=${enableDemo} />`;
+    else if (route === 'dashboard') page = html`<${DashboardPage} history=${history} go=${go} />`;
+    else if (route === 'history') page = html`<${HistoryPage} history=${history} go=${go} onOpen=${openEntry} onDelete=${deleteEntry} onClear=${clearAll} />`;
+    else if (route === 'about') page = html`<${AboutPage} openSettings=${openSettings} />`;
+    else page = html`<${HomePage} go=${go} />`;
+
+    return html`<div class="flex min-h-screen flex-col">
+      <${Header} route=${route} go=${go} onSettings=${openSettings} />
+      <main class="flex-1">${page}</main>
+      <${Footer} />
+      ${dialog && html`<${SettingsDialog} settings=${settings} onSave=${saveSettings} onClose=${function () { setDialog(false); }} />`}
+    </div>`;
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+})();
+</script>
