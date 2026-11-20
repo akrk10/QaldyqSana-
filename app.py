@@ -8,7 +8,7 @@ import pandas as pd
 from PIL import Image
 from ultralytics import YOLO
 ==========================================
-PAGE CONFIGURATION
+# PAGE CONFIGURATION
 ==========================================
 st.set_page_config(
     page_title="QaldyqSana",
@@ -16,7 +16,7 @@ st.set_page_config(
     layout="wide"
 )
 ==========================================
-CONSTANTS
+# CONSTANTS
 ==========================================
 FILE_ID = "13KWKyzBpYzWlrG9vpQvkoPYgk0gMUaWZ"
 MODEL_PATH = "best_v3.pt"
@@ -37,14 +37,14 @@ ALIASES = {
     "other": "Other"
 }
 ==========================================
-SESSION STATE
+# SESSION STATE
 ==========================================
 if "history" not in st.session_state:
     st.session_state.history = []
 if "last_analysis" not in st.session_state:
     st.session_state.last_analysis = None
 ==========================================
-LOAD YOLO MODEL
+# LOAD YOLO MODEL
 ==========================================
 @st.cache_resource
 def load_model():
@@ -76,7 +76,7 @@ def load_model():
         
     return loaded_model
 ==========================================
-SIDEBAR NAVIGATION
+# SIDEBAR NAVIGATION
 ==========================================
 st.sidebar.title("♻️ QaldyqSana")
 st.sidebar.caption(
@@ -98,7 +98,7 @@ st.sidebar.info(
     "Artificial Intelligence."
 )
 ==========================================
-HOME
+# HOME
 ==========================================
 if page == "Home":
     st.title("♻️ QaldyqSana")
@@ -143,7 +143,7 @@ if page == "Home":
         "an image and start detecting waste."
     )
 ==========================================
-AI ANALYSIS
+# AI ANALYSIS
 ==========================================
 elif page == "AI Analysis": 
     
@@ -343,7 +343,7 @@ elif page == "AI Analysis":
                     f"Analysis error: {error}"
                 )
 ==========================================
-DASHBOARD
+# DASHBOARD
 ==========================================
 elif page == "Dashboard":
     
@@ -436,7 +436,7 @@ elif page == "Dashboard":
             hide_index=True
         )
 ==========================================
-HISTORY
+# HISTORY
 ==========================================
 elif page == "History":
     st.title("🕘 Analysis History")
@@ -477,7 +477,7 @@ elif page == "History":
             
             st.rerun()
 ==========================================
-ABOUT
+# ABOUT
 ==========================================
 elif page == "About":
     st.title("ℹ️ About QaldyqSana")
