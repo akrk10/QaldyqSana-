@@ -72,7 +72,7 @@ def load_model():
 
 try:
     model = load_model()
-    st.write("YOLO class name:", model.names
+    st.write("YOLO class name:", model.names)
 except Exception as error:
     st.error(f"Model loading error: {error}")
     st.stop()
