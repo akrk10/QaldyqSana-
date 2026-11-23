@@ -4,7 +4,7 @@ plotly
 pillow
 ultralytics-opencv-headless
 opencv-python-headless==4.10.0.84
-gdown
+gdown==5.2.0
 fastapi
 uvicorn
 python-multipart
