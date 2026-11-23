@@ -18,7 +18,9 @@ st.set_page_config(
 # ==========================================
 # CONSTANTS
 # ==========================================
-FILE_ID = "13KWKyzBpYzWlrG9vpQvkoPYgk0gMUaWZ"
+# Google Drive file "best_v3.pt" (same ID as detector.py).
+# The previous ID (13KWKyzB...) pointed to a different file named "best.pt".
+FILE_ID = "15FVrrLwqYpXi6W1UbEdcmESovQf95y9b"
 MODEL_PATH = "best_v3.pt"
 CATEGORIES = [
     "Plastic",
@@ -27,15 +29,25 @@ CATEGORIES = [
     "Glass",
     "Other"
 ]
-ALIASES = {
-    "plastic": "Plastic",
-    "paper": "Paper/Cardboard",
-    "paper/cardboard": "Paper/Cardboard",
-    "cardboard": "Paper/Cardboard",
-    "metal": "Metal",
-    "glass": "Glass",
-    "other": "Other"
-}
+RECYCLABLE = ["Plastic", "Paper/Cardboard", "Metal", "Glass"]
+
+
+def to_category(class_name):
+    """Map a model class name to one of the 5 categories (same rule as detector.py).
+
+    Substring matching, so names such as "plastic_bottle" or "Paper-Cardboard"
+    are not silently counted as Other.
+    """
+    name = str(class_name).lower().replace("_", " ").replace("-", " ")
+    if "plastic" in name:
+        return "Plastic"
+    if "paper" in name or "cardboard" in name:
+        return "Paper/Cardboard"
+    if "metal" in name or "aluminium" in name or "aluminum" in name:
+        return "Metal"
+    if "glass" in name:
+        return "Glass"
+    return "Other"
 # ==========================================
 # SESSION STATE
 # ==========================================
@@ -89,6 +101,7 @@ page = st.sidebar.radio(
         "AI Analysis",
         "Dashboard",
         "History",
+        "Economics",
         "About"
     ]
 )
@@ -169,7 +182,7 @@ elif page == "AI Analysis":
         
         st.image(
             image,
-            use_container_width=True
+            width="stretch"
         )
         
         if st.button(
@@ -218,10 +231,7 @@ elif page == "AI Analysis":
                                     model.names[class_id]
                                 )
                                 
-                            category = ALIASES.get(
-                                raw_name.lower(),
-                                "Other"
-                            )
+                            category = to_category(raw_name)
 
                             confidence = float(
                                 box.conf[0].item()
@@ -271,7 +281,8 @@ elif page == "AI Analysis":
                     "Recyclable detections": recyclable,
                     "Recyclable share (%)": round(
                         recyclable_percent, 1
-                    )
+                    ),
+                    **{category: counts[category] for category in CATEGORIES}
                 })
                     st.success("Analysis completed!")
 
@@ -280,7 +291,7 @@ elif page == "AI Analysis":
                     st.image(
                         annotated_image,
                         channels="BGR",
-                        use_container_width=True
+                        width="stretch"
                     )
 
                     st.subheader("Waste Statistics")
@@ -318,9 +329,15 @@ elif page == "AI Analysis":
 
                     st.dataframe(
                         details,
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True
                     )
+
+                    with st.expander("Model classes (from best_v3.pt)"):
+                        st.write(
+                            {int(k): f"{v} → {to_category(v)}" for k, v in
+                             (model.names.items() if isinstance(model.names, dict) else enumerate(model.names))}
+                        )
 
                     if confidences:
                         
@@ -429,7 +446,7 @@ elif page == "Dashboard":
         
         st.dataframe(
             df,
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 # ==========================================
@@ -453,7 +470,7 @@ elif page == "History":
         )
         st.dataframe(
             df,
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
         csv = df.to_csv(
@@ -473,6 +490,81 @@ elif page == "History":
             st.session_state.last_analysis = None
             
             st.rerun()
+# ==========================================
+# ECONOMICS
+# ==========================================
+elif page == "Economics":
+    st.title("💰 Economic Estimate")
+
+    st.write(
+        "Object counts below are **measured** by the model in this session. "
+        "Mass and price are **assumptions**: a photo cannot show an object's real "
+        "weight or market value. Edit them to match your local recycling point."
+    )
+
+    history = st.session_state.history
+    totals = {
+        category: int(sum(entry.get(category, 0) for entry in history))
+        for category in CATEGORIES
+    }
+
+    # Default assumptions. Prices: Kazakhstan collection points, 2024–2025 publications
+    # (informburo.kz: PET 50–90 ₸/kg, aluminium ~150 ₸/kg, paper/cardboard 10–50 ₸/kg).
+    # Glass price and per-item masses are unsourced estimates.
+    defaults = pd.DataFrame({
+        "Category": CATEGORIES,
+        "Mass per object (g)": [25.0, 40.0, 15.0, 350.0, 50.0],
+        "Price (₸ per kg)": [70.0, 30.0, 150.0, 5.0, 0.0],
+    })
+    if "economics_assumptions" not in st.session_state:
+        st.session_state.economics_assumptions = defaults
+
+    st.subheader("Assumptions (editable)")
+    assumptions = st.data_editor(
+        st.session_state.economics_assumptions,
+        hide_index=True,
+        disabled=["Category"],
+        width="stretch",
+        key="economics_editor",
+    )
+    if st.button("Reset assumptions"):
+        st.session_state.economics_assumptions = defaults
+        st.rerun()
+
+    rows = []
+    for _, row in assumptions.iterrows():
+        category = row["Category"]
+        count = totals[category]
+        mass_kg = count * float(row["Mass per object (g)"]) / 1000
+        value = mass_kg * float(row["Price (₸ per kg)"]) if category in RECYCLABLE else 0.0
+        rows.append({
+            "Category": category,
+            "Detected objects (measured)": count,
+            "Estimated mass (kg)": round(mass_kg, 3),
+            "Estimated value (₸)": round(value, 1),
+        })
+    result_df = pd.DataFrame(rows)
+
+    recyclable_mass = float(result_df.loc[result_df["Category"].isin(RECYCLABLE), "Estimated mass (kg)"].sum())
+    total_value = float(result_df["Estimated value (₸)"].sum())
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Detected objects (measured)", int(result_df["Detected objects (measured)"].sum()))
+    col2.metric("Recyclable mass (estimate)", f"{recyclable_mass:.2f} kg")
+    col3.metric("Recycling value (estimate)", f"{total_value:,.0f} ₸")
+
+    if not history:
+        st.info("No analyses yet. Run an analysis first; the estimate is computed from its results.")
+    else:
+        st.subheader("Estimate by category")
+        st.dataframe(result_df, hide_index=True, width="stretch")
+        st.bar_chart(result_df.set_index("Category")["Estimated value (₸)"])
+
+    st.caption(
+        "Value = detected objects × assumed mass × assumed price. "
+        "Not a profit figure: collection, transport and sorting costs are not included. "
+        "'Other' is treated as non-recyclable."
+    )
 # ==========================================
 # ABOUT
 # ==========================================
